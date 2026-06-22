@@ -410,14 +410,19 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    transition: background 0.3s;
   }
+  #s-fullscreen.alert { background: #cc0000; }
   .fs-name {
     font-size: 13px;
     letter-spacing: 3px;
     text-transform: uppercase;
     color: #333;
     margin-bottom: 0;
+    transition: color 0.3s;
   }
+  #s-fullscreen.alert .fs-name { color: #ffaaaa; }
+
   .fs-time {
     font-size: 80vw;
     font-weight: 900;
@@ -425,7 +430,7 @@
     font-family: monospace;
     line-height: 0.9;
     color: var(--green);
-    transition: color 0.08s;
+    transition: color 0.3s;
     letter-spacing: -4px;
     text-align: center;
     width: 100%;
@@ -435,14 +440,49 @@
   }
   .fs-time.color-b { color: var(--blue); }
   .fs-time.flash { color: #fff; }
+  #s-fullscreen.alert .fs-time { color: #fff !important; }
   .fs-unit {
     font-size: 16px;
     color: #333;
     margin-top: 6px;
     letter-spacing: 3px;
+    transition: color 0.3s;
   }
-  .fs-x2 {
-    display: none;
+  #s-fullscreen.alert .fs-unit { color: #fca5a5; }
+  .fs-x2 { display: none; }
+  .btn-drop {
+    position: absolute;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    border: 2px solid #333;
+    color: #666;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 99px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .btn-drop.active {
+    background: #990000;
+    border-color: #ff6666;
+    color: #ffcccc;
+  }
+  .fs-hint {
+    position: absolute;
+    bottom: 10px;
+    font-size: 11px;
+    color: #222;
+    letter-spacing: 1px;
+    text-align: center;
+    transition: color 0.3s;
+  }
+  #s-fullscreen.alert .fs-hint { color: #aa3333; }
   }
   .fs-hint {
     position: absolute;
@@ -582,6 +622,7 @@
   <div class="fs-time color-a" id="fs-time">—</div>
   <div class="fs-unit">secondes</div>
   <div class="fs-x2" id="fs-x2"></div>
+  <button class="btn-drop" id="btn-drop" onclick="toggleDrop(event)">⚠ Un lâché</button>
   <div class="fs-hint">Tap = passage &nbsp;·&nbsp; Double tap = retour</div>
 </div>
 
@@ -840,14 +881,35 @@ function renderHistory(t) {
 
 // ── FULLSCREEN ──
 let lastTap = 0;
+let dropAlert = false;
 
 function openFullscreen() {
+  dropAlert = false;
+  const fs = document.getElementById('s-fullscreen');
+  fs.classList.remove('alert');
+  document.getElementById('btn-drop').classList.remove('active');
   showScreen('s-fullscreen');
   const t = state.activeTab;
   document.getElementById('fs-name').textContent = state.names[t].toUpperCase();
   document.getElementById('fs-time').className = 'fs-time color-' + t;
   updateFs();
   setupFsTap();
+}
+
+function toggleDrop(e) {
+  e.stopPropagation();
+  dropAlert = !dropAlert;
+  const fs = document.getElementById('s-fullscreen');
+  const btn = document.getElementById('btn-drop');
+  if (dropAlert) {
+    fs.classList.add('alert');
+    btn.classList.add('active');
+    btn.textContent = '✓ Retour normal';
+  } else {
+    fs.classList.remove('alert');
+    btn.classList.remove('active');
+    btn.textContent = '⚠ Un lâché';
+  }
 }
 
 function updateFs() {
