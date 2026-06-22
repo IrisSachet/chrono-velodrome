@@ -419,31 +419,25 @@
     margin-bottom: 16px;
   }
   .fs-time {
-    font-size: clamp(96px, 28vw, 160px);
-    font-weight: 800;
+    font-size: clamp(120px, 38vw, 260px);
+    font-weight: 900;
     font-variant-numeric: tabular-nums;
     font-family: monospace;
     line-height: 1;
     color: var(--green);
     transition: color 0.1s;
+    letter-spacing: -4px;
   }
   .fs-time.color-b { color: var(--blue); }
   .fs-time.flash { color: #fff; }
   .fs-unit {
-    font-size: 18px;
-    color: #444;
-    margin-top: 8px;
-    letter-spacing: 2px;
+    font-size: 20px;
+    color: #333;
+    margin-top: 12px;
+    letter-spacing: 3px;
   }
   .fs-x2 {
-    font-size: 16px;
-    color: var(--amber);
-    background: #fbbf2422;
-    padding: 4px 14px;
-    border-radius: 99px;
-    margin-top: 16px;
-    letter-spacing: 1px;
-    min-height: 30px;
+    display: none;
   }
   .fs-hint {
     position: absolute;
@@ -697,6 +691,7 @@ function tickRider() {
   const t = state.activeTab;
   const r = state.riders[t];
   if (!r.running) return;
+  // Mise à jour stats et historique en temps réel
   updateDashboard();
   r._raf = requestAnimationFrame(() => tickRider());
 }
@@ -879,20 +874,23 @@ function setupFsTap() {
 function handleFsTap(e) {
   e.preventDefault();
   const now = Date.now();
-  if (now - lastTap < 300) {
-    // double tap → retour
+  const delta = now - lastTap;
+  if (delta < 350 && delta > 0) {
+    // double tap → retour dashboard, annule le lap prévu
     lastTap = 0;
     cancelAnimationFrame(fsRaf);
     showScreen('s-dashboard');
     updateDashboard();
   } else {
     lastTap = now;
-    // single tap → passage (with 300ms delay to detect double)
+    // single tap → passage, seulement si pas suivi d'un 2e tap
     setTimeout(() => {
-      if (Date.now() - lastTap >= 280) {
+      if (lastTap === now) {
+        // pas eu de 2e tap → c'est bien un simple tap
         recordLap();
       }
-    }, 310);
+      // si lastTap != now → double tap détecté entre-temps, on ne fait rien
+    }, 360);
   }
 }
 
