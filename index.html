@@ -419,19 +419,19 @@
     margin-bottom: 0;
   }
   .fs-time {
-    font-size: 30vw;
+    font-size: 80vw;
     font-weight: 900;
     font-variant-numeric: tabular-nums;
     font-family: monospace;
     line-height: 0.9;
     color: var(--green);
     transition: color 0.08s;
-    letter-spacing: -2px;
+    letter-spacing: -4px;
     text-align: center;
     width: 100%;
   }
   @media (orientation: landscape) {
-    .fs-time { font-size: 45vh; }
+    .fs-time { font-size: 75vh; }
   }
   .fs-time.color-b { color: var(--blue); }
   .fs-time.flash { color: #fff; }
@@ -674,11 +674,11 @@ function switchTab(t) {
 }
 
 // ── BOUCLE GLOBALE ──
-// Une seule boucle RAF qui tourne toujours, met à jour dashboard ET plein écran
+// Met à jour UNIQUEMENT les chronomètres à 60fps, pas l'historique
 function globalTick() {
   const dash = document.getElementById('s-dashboard').classList.contains('active');
   const fs   = document.getElementById('s-fullscreen').classList.contains('active');
-  if (dash) updateDashboard();
+  if (dash) updateTimerDisplay();
   if (fs)   updateFs();
   requestAnimationFrame(globalTick);
 }
@@ -710,6 +710,7 @@ function recordLap() {
   r.lapStart = now;
   const half = isHalfLap(lapMs);
   r.laps.push({ n: r.laps.length + 1, real: lapMs, half });
+  updateDashboard(); // met à jour historique immédiatement
   if (document.getElementById('s-fullscreen').classList.contains('active')) {
     flashFs(t);
   }
@@ -723,6 +724,16 @@ function resetCurrent() {
 }
 
 // ── DASHBOARD UPDATE ──
+// Mise à jour légère : seulement les chronomètres (appelée à 60fps)
+function updateTimerDisplay() {
+  // rien à afficher côté dashboard pour l'instant (le chrono total est géré par tickSession)
+  // On met juste à jour la carte "dernier tour" si running
+  const t = state.activeTab;
+  const r = state.riders[t];
+  // pas de chrono en cours sur le dashboard, rien à faire ici
+}
+
+// Mise à jour complète : stats + historique + contrôles (appelée sur événement)
 function updateDashboard() {
   const t = state.activeTab;
   const r = state.riders[t];
