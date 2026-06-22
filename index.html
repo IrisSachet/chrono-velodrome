@@ -412,28 +412,33 @@
     flex-direction: column;
   }
   .fs-name {
-    font-size: 14px;
+    font-size: 13px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #444;
-    margin-bottom: 16px;
+    color: #333;
+    margin-bottom: 0;
   }
   .fs-time {
-    font-size: clamp(120px, 38vw, 260px);
+    font-size: 30vw;
     font-weight: 900;
     font-variant-numeric: tabular-nums;
     font-family: monospace;
-    line-height: 1;
+    line-height: 0.9;
     color: var(--green);
-    transition: color 0.1s;
-    letter-spacing: -4px;
+    transition: color 0.08s;
+    letter-spacing: -2px;
+    text-align: center;
+    width: 100%;
+  }
+  @media (orientation: landscape) {
+    .fs-time { font-size: 45vh; }
   }
   .fs-time.color-b { color: var(--blue); }
   .fs-time.flash { color: #fff; }
   .fs-unit {
-    font-size: 20px;
+    font-size: 16px;
     color: #333;
-    margin-top: 12px;
+    margin-top: 6px;
     letter-spacing: 3px;
   }
   .fs-x2 {
@@ -668,6 +673,17 @@ function switchTab(t) {
   updateDashboard();
 }
 
+// ── BOUCLE GLOBALE ──
+// Une seule boucle RAF qui tourne toujours, met à jour dashboard ET plein écran
+function globalTick() {
+  const dash = document.getElementById('s-dashboard').classList.contains('active');
+  const fs   = document.getElementById('s-fullscreen').classList.contains('active');
+  if (dash) updateDashboard();
+  if (fs)   updateFs();
+  requestAnimationFrame(globalTick);
+}
+requestAnimationFrame(globalTick);
+
 // ── TIMER ──
 function toggleTimer() {
   const r = state.riders[state.activeTab];
@@ -677,23 +693,12 @@ function toggleTimer() {
     if (!r.lapStart) r.lapStart = performance.now();
     else r.lapStart = performance.now() - (r._pausedLapMs || 0);
     updateControls();
-    tickRider();
   } else {
     r._pausedLapMs = performance.now() - r.lapStart;
     r.pausedMs += performance.now() - r.startTime;
     r.running = false;
-    cancelAnimationFrame(r._raf);
     updateControls();
   }
-}
-
-function tickRider() {
-  const t = state.activeTab;
-  const r = state.riders[t];
-  if (!r.running) return;
-  // Mise à jour stats et historique en temps réel
-  updateDashboard();
-  r._raf = requestAnimationFrame(() => tickRider());
 }
 
 function recordLap() {
@@ -705,7 +710,6 @@ function recordLap() {
   r.lapStart = now;
   const half = isHalfLap(lapMs);
   r.laps.push({ n: r.laps.length + 1, real: lapMs, half });
-  updateDashboard();
   if (document.getElementById('s-fullscreen').classList.contains('active')) {
     flashFs(t);
   }
@@ -713,8 +717,6 @@ function recordLap() {
 
 function resetCurrent() {
   const t = state.activeTab;
-  const r = state.riders[t];
-  cancelAnimationFrame(r._raf);
   state.riders[t] = { running: false, startTime: null, lapStart: null, laps: [], pausedMs: 0 };
   updateDashboard();
   updateControls();
@@ -826,7 +828,6 @@ function renderHistory(t) {
 }
 
 // ── FULLSCREEN ──
-let fsRaf = null;
 let lastTap = 0;
 
 function openFullscreen() {
@@ -835,13 +836,7 @@ function openFullscreen() {
   document.getElementById('fs-name').textContent = state.names[t].toUpperCase();
   document.getElementById('fs-time').className = 'fs-time color-' + t;
   updateFs();
-  fsRaf = requestAnimationFrame(fsLoop);
   setupFsTap();
-}
-
-function fsLoop() {
-  updateFs();
-  fsRaf = requestAnimationFrame(fsLoop);
 }
 
 function updateFs() {
@@ -878,7 +873,6 @@ function handleFsTap(e) {
   if (delta < 350 && delta > 0) {
     // double tap → retour dashboard, annule le lap prévu
     lastTap = 0;
-    cancelAnimationFrame(fsRaf);
     showScreen('s-dashboard');
     updateDashboard();
   } else {
