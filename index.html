@@ -1059,32 +1059,23 @@ window.addEventListener('gamepadconnected', e => {
   showToast('🎮 Stick connecté : ' + e.gamepad.id.substring(0, 30));
 });
 
-// ── BLUETOOTH STICK — Knorvay N29 (envoie Win+Shift+S) ──
-// On détecte la séquence : on surveille les touches Meta/Win et Shift enfoncées,
-// puis on déclenche sur S
-const _keys = new Set();
+// ── BLUETOOTH STICK — ShiftLeft ──
 document.addEventListener('keydown', e => {
-  _keys.add(e.code);
-  // Win+Shift+S : MetaLeft (ou OSLeft) + ShiftLeft + KeyS
-  const isWinShiftS = (_keys.has('MetaLeft') || _keys.has('OSLeft') || _keys.has('MetaRight'))
-                    && (_keys.has('ShiftLeft') || _keys.has('ShiftRight'))
-                    && e.code === 'KeyS';
-  if (isWinShiftS) {
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
     e.preventDefault();
-    e.stopPropagation();
+    e.stopImmediatePropagation();
     const fs   = document.getElementById('s-fullscreen').classList.contains('active');
     const dash = document.getElementById('s-dashboard').classList.contains('active');
     if (fs) { recordLap(); flashFs(state.activeTab); }
     else if (dash) { recordLap(); }
   }
-  // Bloquer F5 (rechargement page)
-  if (e.code === 'F5') e.preventDefault();
 }, true);
-
-document.addEventListener('keyup', e => { _keys.delete(e.code); }, true);
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
 }
+
+// Empêcher tous les éléments de recevoir le focus clavier (évite navigation Shift+Tab)
+document.querySelectorAll('button, input').forEach(el => el.setAttribute('tabindex', '-1'));
 </script>
 </body>
 </html>
