@@ -1015,7 +1015,20 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// ── SERVICE WORKER ──
+// ── BLUETOOTH STICK (ShiftLeft) ──
+document.addEventListener('keydown', e => {
+  if (e.code === 'ShiftLeft') {
+    e.preventDefault();
+    const dash = document.getElementById('s-dashboard').classList.contains('active');
+    const fs   = document.getElementById('s-fullscreen').classList.contains('active');
+    if (fs) {
+      recordLap();
+      flashFs(state.activeTab);
+    } else if (dash) {
+      recordLap();
+    }
+  }
+});
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
 }
