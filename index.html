@@ -15,8 +15,8 @@
   :root {
     --bg: #111; --bg2: #1a1a1a; --bg3: #222; --border: #2a2a2a;
     --text: #f0f0f0; --muted: #888;
-    --green: #4ade80; --blue: #60a5fa; --red: #f87171; --amber: #fbbf24; --purple: #c084fc;
-    --tab-a: #4ade80; --tab-b: #60a5fa; --tab-c: #c084fc;
+    --green: #4ade80; --blue: #60a5fa; --red: #f87171; --amber: #fbbf24; --cyan: #22d3ee;
+    --tab-a: #4ade80; --tab-b: #60a5fa; --tab-c: #22d3ee;
   }
   html, body { height:100%; width:100%; background:var(--bg); color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; overflow:hidden; touch-action:manipulation; }
@@ -61,7 +61,7 @@
   .tab .tab-dot { width:7px; height:7px; border-radius:50%; }
   .tab.active-a { border-color:var(--tab-a); color:var(--tab-a); background:#14532d22; }
   .tab.active-b { border-color:var(--tab-b); color:var(--tab-b); background:#1e3a5f44; }
-  .tab.active-c { border-color:var(--tab-c); color:var(--tab-c); background:#3b0764aa; }
+  .tab.active-c { border-color:var(--tab-c); color:var(--tab-c); background:#0a2a2e99; }
 
   .dash-content { flex:1; overflow-y:auto; padding:0 16px 16px; display:flex; flex-direction:column; gap:10px; }
 
@@ -70,30 +70,30 @@
   .stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:10px 14px; }
   .stat-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
   .stat-value { font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; font-family:monospace; color:var(--text); }
-  .stat-value.green { color:var(--green); } .stat-value.blue { color:var(--blue); } .stat-value.purple { color:var(--purple); }
+  .stat-value.green { color:var(--green); } .stat-value.blue { color:var(--blue); } .stat-value.cyan { color:var(--cyan); }
 
   /* Last lap card */
   .last-lap-card { background:var(--bg2); border:2px solid var(--border); border-radius:16px; padding:14px 18px; cursor:pointer; transition:border-color 0.15s; position:relative; user-select:none; -webkit-user-select:none; }
   .last-lap-card.color-a { border-color:#4ade8066; }
   .last-lap-card.color-b { border-color:#60a5fa66; }
-  .last-lap-card.color-c { border-color:#c084fc66; }
+  .last-lap-card.color-c { border-color:#22d3ee44; }
   .last-lap-card:active { background:var(--bg3); }
   .last-lap-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; }
   .fullscreen-hint { font-size:11px; color:var(--muted); }
   .last-lap-time { font-size:58px; font-weight:700; font-variant-numeric:tabular-nums; font-family:monospace; line-height:1; margin-bottom:4px; }
-  .last-lap-time.color-a { color:var(--green); } .last-lap-time.color-b { color:var(--blue); } .last-lap-time.color-c { color:var(--purple); }
+  .last-lap-time.color-a { color:var(--green); } .last-lap-time.color-b { color:var(--blue); } .last-lap-time.color-c { color:var(--cyan); }
   .last-lap-time.no-data { color:var(--muted); font-size:36px; padding:10px 0; }
   .last-lap-meta { font-size:12px; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .x2-badge { background:#fbbf2433; color:var(--amber); font-size:11px; padding:2px 8px; border-radius:99px; font-weight:600; }
 
   /* Pronostic card (compétition) */
-  .prono-card { background:#1a0a2e; border:2px solid #c084fc44; border-radius:16px; padding:14px 18px; }
+  .prono-card { background:#001a1e; border:2px solid #22d3ee33; border-radius:16px; padding:14px 18px; }
   .prono-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#9f7aea; margin-bottom:4px; display:flex; justify-content:space-between; }
-  .prono-time { font-size:52px; font-weight:700; font-family:monospace; font-variant-numeric:tabular-nums; color:var(--purple); line-height:1; margin-bottom:4px; }
+  .prono-time { font-size:52px; font-weight:700; font-family:monospace; font-variant-numeric:tabular-nums; color:var(--cyan); line-height:1; margin-bottom:4px; }
   .prono-time.no-data { font-size:30px; color:#555; padding:8px 0; }
   .prono-meta { font-size:12px; color:#9f7aea88; display:flex; gap:12px; flex-wrap:wrap; }
   .prono-bar-wrap { margin-top:10px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-  .prono-bar { height:100%; background:var(--purple); border-radius:3px; transition:width 0.3s; }
+  .prono-bar { height:100%; background:var(--cyan); border-radius:3px; transition:width 0.3s; }
 
   /* Controls */
   .controls { display:flex; gap:8px; flex-shrink:0; }
@@ -103,7 +103,7 @@
   .btn-stop { background:var(--red); color:#fff; }
   .btn-lap-dash { background:#1e3a5f; color:var(--blue); }
   .btn-lap-dash.color-a { background:#14532d33; color:var(--green); }
-  .btn-lap-dash.color-c { background:#3b076488; color:var(--purple); }
+  .btn-lap-dash.color-c { background:#0a2a2e88; color:var(--cyan); }
   .btn-reset-dash { background:var(--bg2); color:var(--muted); border:1px solid var(--border); width:56px; flex:none; border-radius:14px; height:60px; font-size:20px; cursor:pointer; transition:opacity 0.1s, transform 0.08s; }
   .btn-reset-dash:active { transform:scale(0.96); }
 
@@ -139,13 +139,13 @@
   /* Pronostic in fullscreen */
   .fs-prono-box { text-align:center; width:100%; padding:0 16px; flex-shrink:0; }
   .fs-prono-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#333; margin-bottom:2px; }
-  .fs-prono-time { font-size:22px; font-family:monospace; font-variant-numeric:tabular-nums; color:#c084fc; letter-spacing:1px; }
+  .fs-prono-time { font-size:22px; font-family:monospace; font-variant-numeric:tabular-nums; color:#22d3ee; letter-spacing:1px; }
   .fs-prono-dist { font-size:11px; color:#444; margin-top:2px; }
 
   .fs-time { font-size:88vw; font-weight:900; font-variant-numeric:tabular-nums; font-family:monospace; line-height:0.85; color:var(--green); transition:color 0.3s; letter-spacing:-4px; text-align:center; width:100%; }
   @media (orientation:landscape) { .fs-time { font-size:80vh; } }
   .fs-time.color-b { color:var(--blue); }
-  .fs-time.color-c { color:var(--purple); }
+  .fs-time.color-c { color:var(--cyan); }
   .fs-time.flash { color:#fff; }
   #s-fullscreen.alert .fs-time { color:#fff !important; }
   .fs-unit { font-size:16px; color:#333; margin-top:6px; letter-spacing:3px; transition:color 0.3s; }
@@ -277,7 +277,7 @@
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-label">Distance</div>
-        <div class="stat-value purple" id="comp-dist">0m</div>
+        <div class="stat-value.cyan" id="comp-dist">0m</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Clics</div>
@@ -746,14 +746,8 @@ function updateFs() {
     const last=segs[segs.length-1];
     const disp = last.isLaunch ? last.realMs : displayTime(last.realMs, false);
     document.getElementById('fs-time').textContent = fmtLap(disp);
-    const prono=calcPronostic();
-    if(prono) {
-      document.getElementById('fs-prono-time').textContent = fmtMMSS(prono.finalMs);
-      document.getElementById('fs-prono-dist').textContent = Math.round(getCompCumulDist())+'m / '+state.raceDist+'m';
-    } else {
-      document.getElementById('fs-prono-time').textContent = '—';
-      document.getElementById('fs-prono-dist').textContent = 'En attente…';
-    }
+    // Pronostic : NE PAS recalculer ici, garder la valeur figée depuis le dernier clic
+    // (déjà mise à jour par updateComp() au moment du passage)
   } else {
     const r=state.riders[t];
     if(r.laps.length===0) { document.getElementById('fs-time').textContent='—'; return; }
