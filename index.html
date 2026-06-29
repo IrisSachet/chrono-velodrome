@@ -418,17 +418,16 @@
     letter-spacing: 3px;
     text-transform: uppercase;
     color: #333;
-    margin-bottom: 0;
     transition: color 0.3s;
   }
   #s-fullscreen.alert .fs-name { color: #ffaaaa; }
 
   .fs-time {
-    font-size: 80vw;
+    font-size: 88vw;
     font-weight: 900;
     font-variant-numeric: tabular-nums;
     font-family: monospace;
-    line-height: 0.9;
+    line-height: 0.85;
     color: var(--green);
     transition: color 0.3s;
     letter-spacing: -4px;
@@ -436,7 +435,7 @@
     width: 100%;
   }
   @media (orientation: landscape) {
-    .fs-time { font-size: 75vh; }
+    .fs-time { font-size: 80vh; }
   }
   .fs-time.color-b { color: var(--blue); }
   .fs-time.flash { color: #fff; }
@@ -561,7 +560,7 @@
 <div class="screen" id="s-dashboard">
   <div class="dash-header">
     <div>
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Session</div>
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Effort en cours</div>
       <div class="session-timer" id="session-timer">00:00</div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -618,7 +617,13 @@
 <!-- FULLSCREEN -->
 <div class="screen" id="s-fullscreen">
   <div class="fs-tap-zone" id="fs-tap-zone"></div>
-  <div class="fs-name" id="fs-name">COUREUR A</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 20px 0;position:relative;z-index:2;">
+    <div class="fs-name" id="fs-name">COUREUR A</div>
+    <div style="text-align:right;">
+      <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#333;margin-bottom:1px;">Effort</div>
+      <div id="fs-effort" style="font-size:22px;font-family:monospace;font-variant-numeric:tabular-nums;color:#444;letter-spacing:1px;">00:00</div>
+    </div>
+  </div>
   <div class="fs-time color-a" id="fs-time">—</div>
   <div class="fs-unit">secondes</div>
   <div class="fs-x2" id="fs-x2"></div>
@@ -700,10 +705,20 @@ function goSettings() {
   showScreen('s-settings');
 }
 
-// ── SESSION TIMER ──
+// ── CHRONO EFFORT PAR COUREUR ──
+function getRiderElapsed(r) {
+  if (!r.startTime && r.pausedMs === 0) return 0;
+  return r.pausedMs + (r.running ? (performance.now() - r.startTime) : 0);
+}
+
+function fmtEffort(ms) {
+  const s = Math.floor(ms / 1000);
+  return String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+}
+
+// ── SESSION TIMER (gardé pour tickSession) ──
 function tickSession() {
-  document.getElementById('session-timer').textContent = fmtSession(performance.now() - state.sessionStart);
-  state.sessionRaf = requestAnimationFrame(tickSession);
+  // no-op, remplacé par globalTick
 }
 
 // ── TABS ──
@@ -715,12 +730,20 @@ function switchTab(t) {
 }
 
 // ── BOUCLE GLOBALE ──
-// Met à jour UNIQUEMENT les chronomètres à 60fps, pas l'historique
 function globalTick() {
   const dash = document.getElementById('s-dashboard').classList.contains('active');
   const fs   = document.getElementById('s-fullscreen').classList.contains('active');
-  if (dash) updateTimerDisplay();
-  if (fs)   updateFs();
+  if (dash) {
+    // Chrono effort du coureur actif
+    const r = state.riders[state.activeTab];
+    document.getElementById('session-timer').textContent = fmtEffort(getRiderElapsed(r));
+  }
+  if (fs) {
+    updateFs();
+    // Chrono effort en plein écran
+    const r = state.riders[state.activeTab];
+    document.getElementById('fs-effort').textContent = fmtEffort(getRiderElapsed(r));
+  }
   requestAnimationFrame(globalTick);
 }
 requestAnimationFrame(globalTick);
@@ -762,16 +785,6 @@ function resetCurrent() {
   state.riders[t] = { running: false, startTime: null, lapStart: null, laps: [], pausedMs: 0 };
   updateDashboard();
   updateControls();
-}
-
-// ── DASHBOARD UPDATE ──
-// Mise à jour légère : seulement les chronomètres (appelée à 60fps)
-function updateTimerDisplay() {
-  // rien à afficher côté dashboard pour l'instant (le chrono total est géré par tickSession)
-  // On met juste à jour la carte "dernier tour" si running
-  const t = state.activeTab;
-  const r = state.riders[t];
-  // pas de chrono en cours sur le dashboard, rien à faire ici
 }
 
 // Mise à jour complète : stats + historique + contrôles (appelée sur événement)
@@ -1015,39 +1028,47 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// ── BLUETOOTH STICK (ShiftLeft) ──
-document.addEventListener('keydown', e => {
-  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.key === 'Shift') {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  }
-}, true); // capture phase pour intercepter avant tout le reste
+// ── BLUETOOTH STICK — API GAMEPAD ──
+// Le stick se connecte comme une manette : on poll les boutons à chaque frame
+let gpPrevPressed = false;
 
-document.addEventListener('keyup', e => {
-  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.key === 'Shift') {
-    e.preventDefault();
-    e.stopPropagation();
-    const dash = document.getElementById('s-dashboard').classList.contains('active');
-    const fs   = document.getElementById('s-fullscreen').classList.contains('active');
-    if (fs) {
-      recordLap();
-      flashFs(state.activeTab);
-    } else if (dash) {
-      recordLap();
+function pollGamepad() {
+  const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+  let anyPressed = false;
+  for (const gp of gamepads) {
+    if (!gp) continue;
+    // On écoute tous les boutons du stick
+    for (const btn of gp.buttons) {
+      if (btn.pressed) { anyPressed = true; break; }
     }
-    return false;
+    if (anyPressed) break;
   }
-}, true);
+  // Déclenche sur front montant (appui, pas maintien)
+  if (anyPressed && !gpPrevPressed) {
+    const fs = document.getElementById('s-fullscreen').classList.contains('active');
+    const dash = document.getElementById('s-dashboard').classList.contains('active');
+    if (fs) { recordLap(); flashFs(state.activeTab); }
+    else if (dash) { recordLap(); }
+  }
+  gpPrevPressed = anyPressed;
+  requestAnimationFrame(pollGamepad);
+}
+requestAnimationFrame(pollGamepad);
 
-// Empêcher tous les boutons de prendre le focus (évite la navigation par tab/shift)
-document.querySelectorAll('button, input[type=range]').forEach(el => {
-  el.setAttribute('tabindex', '-1');
+window.addEventListener('gamepadconnected', e => {
+  showToast('🎮 Stick connecté : ' + e.gamepad.id.substring(0, 30));
 });
 
-// Bloquer le focus sur le document entier pour les éléments interactifs
-document.addEventListener('focusin', e => {
-  if (e.target !== document.body) e.target.blur();
+// ── FALLBACK CLAVIER (touches non-modificateur) ──
+// Pour les sticks qui envoient Enter ou Espace
+document.addEventListener('keyup', e => {
+  if (e.code === 'Enter' || e.code === 'Space' || e.code === 'KeyZ') {
+    e.preventDefault();
+    const fs = document.getElementById('s-fullscreen').classList.contains('active');
+    const dash = document.getElementById('s-dashboard').classList.contains('active');
+    if (fs) { recordLap(); flashFs(state.activeTab); }
+    else if (dash) { recordLap(); }
+  }
 });
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
