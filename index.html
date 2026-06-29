@@ -13,509 +13,152 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root {
-    --bg: #111;
-    --bg2: #1a1a1a;
-    --bg3: #222;
-    --border: #2a2a2a;
-    --text: #f0f0f0;
-    --muted: #888;
-    --green: #4ade80;
-    --blue: #60a5fa;
-    --red: #f87171;
-    --amber: #fbbf24;
-    --tab-a: #4ade80;
-    --tab-b: #60a5fa;
+    --bg: #111; --bg2: #1a1a1a; --bg3: #222; --border: #2a2a2a;
+    --text: #f0f0f0; --muted: #888;
+    --green: #4ade80; --blue: #60a5fa; --red: #f87171; --amber: #fbbf24; --purple: #c084fc;
+    --tab-a: #4ade80; --tab-b: #60a5fa; --tab-c: #c084fc;
   }
-  html, body {
-    height: 100%; width: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    overflow: hidden;
-    touch-action: manipulation;
-  }
+  html, body { height:100%; width:100%; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; overflow:hidden; touch-action:manipulation; }
 
-  /* ── SCREENS ── */
-  .screen { position: fixed; inset: 0; display: none; flex-direction: column; background: var(--bg); }
-  .screen.active { display: flex; }
+  .screen { position:fixed; inset:0; display:none; flex-direction:column; background:var(--bg); }
+  .screen.active { display:flex; }
 
   /* ── SETTINGS ── */
-  #s-settings {
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px;
-    gap: 0;
-    overflow-y: auto;
-  }
-  .settings-logo {
-    font-size: 48px;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-  .settings-title {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-    text-align: center;
-  }
-  .settings-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 32px;
-    text-align: center;
-  }
-  .settings-section {
-    width: 100%;
-    max-width: 360px;
-    margin-bottom: 24px;
-  }
-  .settings-label {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-    padding-left: 2px;
-  }
-  .settings-row {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .settings-dot {
-    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-  }
-  .dot-a { background: var(--tab-a); }
-  .dot-b { background: var(--tab-b); }
-  .settings-row input[type="text"] {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-size: 16px;
-    flex: 1;
-    font-family: inherit;
-  }
-  .settings-row input[type="text"]::placeholder { color: var(--muted); }
-  .threshold-row {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-  }
-  .threshold-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  .threshold-top span { font-size: 15px; color: var(--text); }
-  .threshold-val {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--amber);
-    font-variant-numeric: tabular-nums;
-    min-width: 52px;
-    text-align: right;
-  }
-  input[type="range"] {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--border);
-    outline: none;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--amber);
-    cursor: pointer;
-  }
-  .threshold-hint {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 10px;
-    line-height: 1.5;
-  }
-  .btn-start-session {
-    width: 100%;
-    max-width: 360px;
-    height: 58px;
-    background: var(--green);
-    color: #000;
-    font-size: 17px;
-    font-weight: 700;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    margin-top: 8px;
-    transition: opacity 0.15s;
-  }
-  .btn-start-session:active { opacity: 0.8; }
+  #s-settings { align-items:center; justify-content:flex-start; padding:24px 24px 32px; gap:0; overflow-y:auto; }
+  .settings-logo { font-size:40px; margin-bottom:6px; text-align:center; width:100%; }
+  .settings-title { font-size:20px; font-weight:600; margin-bottom:2px; text-align:center; width:100%; }
+  .settings-sub { font-size:13px; color:var(--muted); margin-bottom:24px; text-align:center; width:100%; }
+  .settings-section { width:100%; max-width:360px; margin-bottom:20px; }
+  .settings-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; padding-left:2px; }
+  .settings-row { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:12px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
+  .settings-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .dot-a { background:var(--tab-a); } .dot-b { background:var(--tab-b); }
+  .settings-row input[type="text"] { background:transparent; border:none; outline:none; color:var(--text); font-size:16px; flex:1; font-family:inherit; }
+  .settings-row input[type="text"]::placeholder { color:var(--muted); }
+  .settings-row input[type="number"] { background:transparent; border:none; outline:none; color:var(--amber); font-size:18px; font-weight:600; font-family:monospace; width:70px; text-align:right; }
+  .threshold-row { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .threshold-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .threshold-top span { font-size:14px; color:var(--text); }
+  .threshold-val { font-size:22px; font-weight:600; color:var(--amber); font-variant-numeric:tabular-nums; min-width:52px; text-align:right; }
+  input[type="range"] { width:100%; -webkit-appearance:none; height:4px; border-radius:2px; background:var(--border); outline:none; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--amber); cursor:pointer; }
+  .threshold-hint { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5; }
+  .btn-start-session { width:100%; max-width:360px; height:56px; background:var(--green); color:#000; font-size:17px; font-weight:700; border:none; border-radius:14px; cursor:pointer; letter-spacing:0.5px; margin-top:8px; transition:opacity 0.15s; }
+  .btn-start-session:active { opacity:0.8; }
 
   /* ── DASHBOARD ── */
-  #s-dashboard { flex-direction: column; }
-
-  .dash-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px 8px;
-    flex-shrink: 0;
-  }
-  .session-timer {
-    font-size: 13px;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-    font-family: monospace;
-  }
-  .btn-settings-small {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 13px;
-    padding: 4px 10px;
-    cursor: pointer;
-  }
-  .btn-export {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--blue);
-    font-size: 13px;
-    padding: 4px 10px;
-    cursor: pointer;
-  }
+  #s-dashboard { flex-direction:column; }
+  .dash-header { display:flex; align-items:center; justify-content:space-between; padding:10px 16px 6px; flex-shrink:0; }
+  .effort-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:2px; }
+  .session-timer { font-size:20px; font-weight:600; font-family:monospace; font-variant-numeric:tabular-nums; color:var(--text); }
+  .btn-settings-small { background:var(--bg2); border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:13px; padding:4px 10px; cursor:pointer; }
+  .btn-export { background:var(--bg2); border:1px solid var(--border); border-radius:8px; color:var(--blue); font-size:13px; padding:4px 10px; cursor:pointer; }
 
   /* Tabs */
-  .tabs {
-    display: flex;
-    padding: 0 16px;
-    gap: 8px;
-    flex-shrink: 0;
-    margin-bottom: 12px;
-  }
-  .tab {
-    flex: 1;
-    height: 40px;
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background: var(--bg2);
-    color: var(--muted);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-  }
-  .tab .tab-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .tab.active-a { border-color: var(--tab-a); color: var(--tab-a); background: #14532d22; }
-  .tab.active-b { border-color: var(--tab-b); color: var(--tab-b); background: #1e3a5f44; }
+  .tabs { display:flex; padding:0 16px; gap:6px; flex-shrink:0; margin-bottom:10px; }
+  .tab { flex:1; height:38px; border-radius:10px; border:2px solid transparent; background:var(--bg2); color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .tab .tab-dot { width:7px; height:7px; border-radius:50%; }
+  .tab.active-a { border-color:var(--tab-a); color:var(--tab-a); background:#14532d22; }
+  .tab.active-b { border-color:var(--tab-b); color:var(--tab-b); background:#1e3a5f44; }
+  .tab.active-c { border-color:var(--tab-c); color:var(--tab-c); background:#3b0764aa; }
 
-  /* Dash content */
-  .dash-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 16px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+  .dash-content { flex:1; overflow-y:auto; padding:0 16px 16px; display:flex; flex-direction:column; gap:10px; }
 
   /* Stats row */
-  .stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .stat-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
-  }
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .stat-value {
-    font-size: 26px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    font-family: monospace;
-    color: var(--text);
-  }
-  .stat-value.green { color: var(--green); }
-  .stat-value.blue { color: var(--blue); }
+  .stats-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:10px 14px; }
+  .stat-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
+  .stat-value { font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; font-family:monospace; color:var(--text); }
+  .stat-value.green { color:var(--green); } .stat-value.blue { color:var(--blue); } .stat-value.purple { color:var(--purple); }
 
   /* Last lap card */
-  .last-lap-card {
-    background: var(--bg2);
-    border: 2px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-    position: relative;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .last-lap-card.color-a { border-color: #4ade8066; }
-  .last-lap-card.color-b { border-color: #60a5fa66; }
-  .last-lap-card:active { background: var(--bg3); }
-  .last-lap-label {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .fullscreen-hint {
-    font-size: 11px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .last-lap-time {
-    font-size: 64px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    font-family: monospace;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .last-lap-time.color-a { color: var(--green); }
-  .last-lap-time.color-b { color: var(--blue); }
-  .last-lap-time.no-data { color: var(--muted); font-size: 40px; padding: 12px 0; }
-  .last-lap-meta {
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .x2-badge {
-    background: #fbbf2433;
-    color: var(--amber);
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-weight: 600;
-  }
+  .last-lap-card { background:var(--bg2); border:2px solid var(--border); border-radius:16px; padding:14px 18px; cursor:pointer; transition:border-color 0.15s; position:relative; user-select:none; -webkit-user-select:none; }
+  .last-lap-card.color-a { border-color:#4ade8066; }
+  .last-lap-card.color-b { border-color:#60a5fa66; }
+  .last-lap-card.color-c { border-color:#c084fc66; }
+  .last-lap-card:active { background:var(--bg3); }
+  .last-lap-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; }
+  .fullscreen-hint { font-size:11px; color:var(--muted); }
+  .last-lap-time { font-size:58px; font-weight:700; font-variant-numeric:tabular-nums; font-family:monospace; line-height:1; margin-bottom:4px; }
+  .last-lap-time.color-a { color:var(--green); } .last-lap-time.color-b { color:var(--blue); } .last-lap-time.color-c { color:var(--purple); }
+  .last-lap-time.no-data { color:var(--muted); font-size:36px; padding:10px 0; }
+  .last-lap-meta { font-size:12px; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .x2-badge { background:#fbbf2433; color:var(--amber); font-size:11px; padding:2px 8px; border-radius:99px; font-weight:600; }
+
+  /* Pronostic card (compétition) */
+  .prono-card { background:#1a0a2e; border:2px solid #c084fc44; border-radius:16px; padding:14px 18px; }
+  .prono-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#9f7aea; margin-bottom:4px; display:flex; justify-content:space-between; }
+  .prono-time { font-size:52px; font-weight:700; font-family:monospace; font-variant-numeric:tabular-nums; color:var(--purple); line-height:1; margin-bottom:4px; }
+  .prono-time.no-data { font-size:30px; color:#555; padding:8px 0; }
+  .prono-meta { font-size:12px; color:#9f7aea88; display:flex; gap:12px; flex-wrap:wrap; }
+  .prono-bar-wrap { margin-top:10px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .prono-bar { height:100%; background:var(--purple); border-radius:3px; transition:width 0.3s; }
 
   /* Controls */
-  .controls {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-  .btn-main {
-    flex: 1;
-    height: 64px;
-    border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.1s, transform 0.08s;
-    letter-spacing: 0.3px;
-  }
-  .btn-main:active { transform: scale(0.96); opacity: 0.85; }
-  .btn-go { background: var(--green); color: #000; }
-  .btn-stop { background: var(--red); color: #fff; }
-  .btn-lap-dash {
-    background: #1e3a5f;
-    color: var(--blue);
-  }
-  .btn-lap-dash.color-a { background: #14532d33; color: var(--green); }
-  .btn-reset-dash {
-    background: var(--bg2);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    width: 60px;
-    flex: none;
-    border-radius: 14px;
-    height: 64px;
-    font-size: 22px;
-    cursor: pointer;
-    transition: opacity 0.1s, transform 0.08s;
-  }
-  .btn-reset-dash:active { transform: scale(0.96); }
+  .controls { display:flex; gap:8px; flex-shrink:0; }
+  .btn-main { flex:1; height:60px; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer; transition:opacity 0.1s, transform 0.08s; letter-spacing:0.3px; }
+  .btn-main:active { transform:scale(0.96); opacity:0.85; }
+  .btn-go { background:var(--green); color:#000; }
+  .btn-stop { background:var(--red); color:#fff; }
+  .btn-lap-dash { background:#1e3a5f; color:var(--blue); }
+  .btn-lap-dash.color-a { background:#14532d33; color:var(--green); }
+  .btn-lap-dash.color-c { background:#3b076488; color:var(--purple); }
+  .btn-reset-dash { background:var(--bg2); color:var(--muted); border:1px solid var(--border); width:56px; flex:none; border-radius:14px; height:60px; font-size:20px; cursor:pointer; transition:opacity 0.1s, transform 0.08s; }
+  .btn-reset-dash:active { transform:scale(0.96); }
 
   /* History */
-  .history-section { flex: 1; }
-  .history-title {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-    padding-left: 2px;
-  }
-  .lap-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 9px 12px;
-    border-radius: 10px;
-    margin-bottom: 4px;
-    background: var(--bg2);
-    border-left: 3px solid transparent;
-    animation: fadeIn 0.2s ease;
-  }
-  .lap-row.best { border-left-color: var(--green); }
-  .lap-row.worst { border-left-color: var(--red); }
-  .lap-num { font-size: 12px; color: var(--muted); min-width: 44px; }
-  .lap-split { font-size: 18px; font-family: monospace; font-variant-numeric: tabular-nums; color: var(--text); }
-  .lap-right { display: flex; align-items: center; gap: 6px; }
-  .lap-diff { font-size: 12px; font-family: monospace; }
-  .lap-diff.faster { color: var(--green); }
-  .lap-diff.slower { color: var(--red); }
-  .lap-tag { font-size: 10px; padding: 2px 6px; border-radius: 99px; }
-  .lap-tag.best { background: #14532d; color: var(--green); }
-  .lap-tag.worst { background: #450a0a; color: var(--red); }
-  .lap-x2 { font-size: 10px; color: var(--amber); }
-  .empty-history {
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-    padding: 24px 0;
-  }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+  .history-section { flex:1; }
+  .history-title { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; padding-left:2px; }
+  .lap-row { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:10px; margin-bottom:4px; background:var(--bg2); border-left:3px solid transparent; animation:fadeIn 0.2s ease; }
+  .lap-row.best { border-left-color:var(--green); }
+  .lap-row.worst { border-left-color:var(--red); }
+  .lap-row.launch { border-left-color:var(--amber); background:#1a1500; }
+  .lap-num { font-size:12px; color:var(--muted); min-width:60px; }
+  .lap-split { font-size:17px; font-family:monospace; font-variant-numeric:tabular-nums; color:var(--text); }
+  .lap-right { display:flex; align-items:center; gap:6px; }
+  .lap-diff { font-size:12px; font-family:monospace; }
+  .lap-diff.faster { color:var(--green); } .lap-diff.slower { color:var(--red); }
+  .lap-tag { font-size:10px; padding:2px 6px; border-radius:99px; }
+  .lap-tag.best { background:#14532d; color:var(--green); }
+  .lap-tag.worst { background:#450a0a; color:var(--red); }
+  .lap-tag.launch { background:#451a00; color:var(--amber); }
+  .lap-x2 { font-size:10px; color:var(--amber); }
+  .empty-history { text-align:center; color:var(--muted); font-size:14px; padding:20px 0; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; } }
 
   /* ── FULLSCREEN ── */
-  #s-fullscreen {
-    background: #000;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    transition: background 0.3s;
-  }
-  #s-fullscreen.alert { background: #cc0000; }
-  .fs-name {
-    font-size: 13px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #333;
-    transition: color 0.3s;
-  }
-  #s-fullscreen.alert .fs-name { color: #ffaaaa; }
+  #s-fullscreen { background:#000; align-items:center; justify-content:center; flex-direction:column; transition:background 0.3s; }
+  #s-fullscreen.alert { background:#cc0000; }
+  .fs-topbar { display:flex; justify-content:space-between; align-items:flex-start; width:100%; padding:14px 20px 0; position:relative; z-index:2; flex-shrink:0; }
+  .fs-name { font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#333; transition:color 0.3s; }
+  #s-fullscreen.alert .fs-name { color:#ffaaaa; }
+  .fs-effort-box { text-align:right; }
+  .fs-effort-label { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#333; margin-bottom:1px; }
+  .fs-effort { font-size:22px; font-family:monospace; font-variant-numeric:tabular-nums; color:#444; letter-spacing:1px; }
+  /* Pronostic in fullscreen */
+  .fs-prono-box { text-align:center; width:100%; padding:0 16px; flex-shrink:0; }
+  .fs-prono-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#333; margin-bottom:2px; }
+  .fs-prono-time { font-size:22px; font-family:monospace; font-variant-numeric:tabular-nums; color:#c084fc; letter-spacing:1px; }
+  .fs-prono-dist { font-size:11px; color:#444; margin-top:2px; }
 
-  .fs-time {
-    font-size: 88vw;
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-    font-family: monospace;
-    line-height: 0.85;
-    color: var(--green);
-    transition: color 0.3s;
-    letter-spacing: -4px;
-    text-align: center;
-    width: 100%;
-  }
-  @media (orientation: landscape) {
-    .fs-time { font-size: 80vh; }
-  }
-  .fs-time.color-b { color: var(--blue); }
-  .fs-time.flash { color: #fff; }
-  #s-fullscreen.alert .fs-time { color: #fff !important; }
-  .fs-unit {
-    font-size: 16px;
-    color: #333;
-    margin-top: 6px;
-    letter-spacing: 3px;
-    transition: color 0.3s;
-  }
-  #s-fullscreen.alert .fs-unit { color: #fca5a5; }
-  .fs-x2 { display: none; }
-  .btn-drop {
-    position: absolute;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1a1a1a;
-    border: 2px solid #333;
-    color: #666;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 12px 28px;
-    border-radius: 99px;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: all 0.2s;
-    white-space: nowrap;
-    z-index: 10;
-  }
-  .btn-drop.active {
-    background: #990000;
-    border-color: #ff6666;
-    color: #ffcccc;
-  }
-  .fs-hint {
-    position: absolute;
-    bottom: 10px;
-    font-size: 11px;
-    color: #222;
-    letter-spacing: 1px;
-    text-align: center;
-    transition: color 0.3s;
-  }
-  #s-fullscreen.alert .fs-hint { color: #aa3333; }
-  }
-  .fs-hint {
-    position: absolute;
-    bottom: 40px;
-    font-size: 12px;
-    color: #333;
-    letter-spacing: 1px;
-    text-align: center;
-    line-height: 1.8;
-  }
-  .fs-tap-zone {
-    position: absolute;
-    inset: 0;
-  }
+  .fs-time { font-size:88vw; font-weight:900; font-variant-numeric:tabular-nums; font-family:monospace; line-height:0.85; color:var(--green); transition:color 0.3s; letter-spacing:-4px; text-align:center; width:100%; }
+  @media (orientation:landscape) { .fs-time { font-size:80vh; } }
+  .fs-time.color-b { color:var(--blue); }
+  .fs-time.color-c { color:var(--purple); }
+  .fs-time.flash { color:#fff; }
+  #s-fullscreen.alert .fs-time { color:#fff !important; }
+  .fs-unit { font-size:16px; color:#333; margin-top:6px; letter-spacing:3px; transition:color 0.3s; }
+  #s-fullscreen.alert .fs-unit { color:#fca5a5; }
+  .fs-x2 { display:none; }
+  .btn-drop { position:absolute; bottom:36px; left:50%; transform:translateX(-50%); background:#1a1a1a; border:2px solid #333; color:#666; font-size:15px; font-weight:600; padding:12px 28px; border-radius:99px; cursor:pointer; letter-spacing:0.5px; transition:all 0.2s; white-space:nowrap; z-index:10; }
+  .btn-drop.active { background:#990000; border-color:#ff6666; color:#ffcccc; }
+  .fs-hint { position:absolute; bottom:10px; font-size:11px; color:#222; letter-spacing:1px; text-align:center; transition:color 0.3s; }
+  #s-fullscreen.alert .fs-hint { color:#aa3333; }
+  .fs-tap-zone { position:absolute; inset:0; }
 
-  /* Export toast */
-  .toast {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--green);
-    color: #000;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 99px;
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-    z-index: 999;
-    white-space: nowrap;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green); color:#000; font-size:14px; font-weight:600; padding:10px 20px; border-radius:99px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:999; white-space:nowrap; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -546,9 +189,24 @@
         <span class="threshold-val" id="threshold-display">12.0s</span>
       </div>
       <input type="range" id="threshold-slider" min="3" max="40" step="0.5" value="12">
-      <div class="threshold-hint">
-        → le temps affiché à l'athlète sera <strong>multiplié par 2</strong> (demi-tour détecté).<br>
-        Mettre à 0 pour désactiver.
+      <div class="threshold-hint">→ le temps affiché à l'athlète sera <strong>multiplié par 2</strong> (demi-tour détecté).</div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">Mode Compétition</div>
+    <div class="settings-row" style="justify-content:space-between;">
+      <span style="font-size:15px;">Longueur du vélodrome</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="number" id="velodrome-len" value="250" min="100" max="500" step="1" style="width:70px;">
+        <span style="color:var(--muted);font-size:14px;">m</span>
+      </div>
+    </div>
+    <div class="settings-row" style="justify-content:space-between;">
+      <span style="font-size:15px;">Distance totale épreuve</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="number" id="race-dist" value="4000" min="500" max="20000" step="500" style="width:80px;">
+        <span style="color:var(--muted);font-size:14px;">m</span>
       </div>
     </div>
   </div>
@@ -560,7 +218,7 @@
 <div class="screen" id="s-dashboard">
   <div class="dash-header">
     <div>
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Effort en cours</div>
+      <div class="effort-label">Effort en cours</div>
       <div class="session-timer" id="session-timer">00:00</div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -578,9 +236,13 @@
       <div class="tab-dot" style="background:var(--tab-b)"></div>
       <span id="tab-label-b">Coureur B</span>
     </div>
+    <div class="tab" id="tab-c" onclick="switchTab('c')">
+      <div class="tab-dot" style="background:var(--tab-c)"></div>
+      <span>Compétition</span>
+    </div>
   </div>
 
-  <div class="dash-content">
+  <div class="dash-content" id="dash-normal">
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-label">Tours</div>
@@ -591,7 +253,6 @@
         <div class="stat-value green" id="stat-best">—</div>
       </div>
     </div>
-
     <div class="last-lap-card color-a" id="last-lap-card" onclick="openFullscreen()">
       <div class="last-lap-label">
         <span>Dernier temps au tour</span>
@@ -600,16 +261,60 @@
       <div class="last-lap-time no-data color-a" id="last-lap-time">— —</div>
       <div class="last-lap-meta" id="last-lap-meta"></div>
     </div>
-
-    <div class="controls" id="controls">
+    <div class="controls">
       <button class="btn-main btn-go" id="btn-startstop" onclick="toggleTimer()">▶ Démarrer</button>
       <button class="btn-main btn-lap-dash color-a" id="btn-lap" onclick="recordLap()" disabled style="opacity:0.35;">⚑ Passage</button>
       <button class="btn-reset-dash" onclick="resetCurrent()" title="Reset">↺</button>
     </div>
-
     <div class="history-section">
       <div class="history-title">Historique des tours</div>
       <div id="history-list"><div class="empty-history">Aucun tour enregistré</div></div>
+    </div>
+  </div>
+
+  <!-- COMPÉTITION CONTENT -->
+  <div class="dash-content" id="dash-comp" style="display:none;">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Distance</div>
+        <div class="stat-value purple" id="comp-dist">0m</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Clics</div>
+        <div class="stat-value" id="comp-clicks">0</div>
+      </div>
+    </div>
+
+    <!-- Pronostic temps final -->
+    <div class="prono-card" id="prono-card" onclick="openFullscreen()">
+      <div class="prono-label">
+        <span>🏁 Pronostic temps final</span>
+        <span class="fullscreen-hint" style="color:#9f7aea88;">⛶ Plein écran</span>
+      </div>
+      <div class="prono-time no-data" id="prono-time">— —</div>
+      <div class="prono-meta" id="prono-meta"></div>
+      <div class="prono-bar-wrap"><div class="prono-bar" id="prono-bar" style="width:0%"></div></div>
+    </div>
+
+    <!-- Dernier temps segment -->
+    <div class="last-lap-card color-c" id="comp-last-card" onclick="openFullscreen()">
+      <div class="last-lap-label">
+        <span>Dernier segment</span>
+        <span class="fullscreen-hint">⛶ Plein écran</span>
+      </div>
+      <div class="last-lap-time no-data color-c" id="comp-last-time">— —</div>
+      <div class="last-lap-meta" id="comp-last-meta"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-main btn-go" id="comp-startstop" onclick="toggleCompTimer()">▶ Démarrer</button>
+      <button class="btn-main btn-lap-dash color-c" id="comp-lap" onclick="recordCompLap()" disabled style="opacity:0.35;">⚑ Passage</button>
+      <button class="btn-reset-dash" onclick="resetComp()" title="Reset">↺</button>
+    </div>
+
+    <div class="history-section">
+      <div class="history-title">Segments</div>
+      <div id="comp-history"><div class="empty-history">Aucun segment</div></div>
     </div>
   </div>
 </div>
@@ -617,15 +322,21 @@
 <!-- FULLSCREEN -->
 <div class="screen" id="s-fullscreen">
   <div class="fs-tap-zone" id="fs-tap-zone"></div>
-  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 20px 0;position:relative;z-index:2;">
+  <div class="fs-topbar">
     <div class="fs-name" id="fs-name">COUREUR A</div>
-    <div style="text-align:right;">
-      <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#333;margin-bottom:1px;">Effort</div>
-      <div id="fs-effort" style="font-size:22px;font-family:monospace;font-variant-numeric:tabular-nums;color:#444;letter-spacing:1px;">00:00</div>
+    <div class="fs-effort-box">
+      <div class="fs-effort-label" id="fs-effort-label">Effort</div>
+      <div class="fs-effort" id="fs-effort">00:00</div>
     </div>
   </div>
+  <!-- Pronostic (visible seulement en mode compétition) -->
+  <div class="fs-prono-box" id="fs-prono-box" style="display:none;">
+    <div class="fs-prono-label">Pronostic final</div>
+    <div class="fs-prono-time" id="fs-prono-time">—</div>
+    <div class="fs-prono-dist" id="fs-prono-dist"></div>
+  </div>
   <div class="fs-time color-a" id="fs-time">—</div>
-  <div class="fs-unit">secondes</div>
+  <div class="fs-unit" id="fs-unit">secondes</div>
   <div class="fs-x2" id="fs-x2"></div>
   <button class="btn-drop" id="btn-drop" onclick="toggleDrop(event)">⚠ Un lâché</button>
   <div class="fs-hint">Tap = passage &nbsp;·&nbsp; Double tap = retour</div>
@@ -637,445 +348,520 @@
 // ── STATE ──
 const state = {
   threshold: 12,
+  veloLen: 250,
+  raceDist: 4000,
   names: { a: 'Coureur A', b: 'Coureur B' },
-  sessionStart: null,
-  sessionRaf: null,
   activeTab: 'a',
   riders: {
-    a: { running: false, startTime: null, lapStart: null, laps: [], pausedMs: 0 },
-    b: { running: false, startTime: null, lapStart: null, laps: [], pausedMs: 0 }
+    a: { running:false, startTime:null, lapStart:null, laps:[], pausedMs:0 },
+    b: { running:false, startTime:null, lapStart:null, laps:[], pausedMs:0 }
+  },
+  comp: {
+    running:false, startTime:null, lapStart:null, pausedMs:0,
+    segments:[] // { realMs, distM, isLaunch }
   }
 };
 
 // ── UTILS ──
-function fmtSession(ms) {
-  const s = Math.floor(ms / 1000);
-  return String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+function fmtMSS(ms) {
+  const s = Math.floor(ms/1000);
+  return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 }
-function fmtLap(ms) {
-  // ss.s format
-  if (ms < 0) ms = 0;
-  const s = ms / 1000;
-  return s.toFixed(1);
+function fmtLap(ms) { if(ms<0)ms=0; return (ms/1000).toFixed(1); }
+function fmtLapFull(ms) { return fmtLap(ms)+'s'; }
+function fmtMMSS(ms) {
+  // mm:ss.s
+  if(ms<0)ms=0;
+  const tot = ms/1000;
+  const m = Math.floor(tot/60);
+  const s = (tot%60).toFixed(1);
+  return (m>0?String(m).padStart(2,'0')+':':'') + String(s.includes('.')?s.padStart(4,'0'):s);
 }
-function fmtLapFull(ms) {
-  return fmtLap(ms) + 's';
+function isHalfLap(ms, isLaunch) {
+  if(isLaunch) return false;
+  return state.threshold > 0 && (ms/1000) < state.threshold;
 }
-function isHalfLap(ms) {
-  return state.threshold > 0 && (ms / 1000) < state.threshold;
-}
-function displayTime(ms) {
-  return isHalfLap(ms) ? ms * 2 : ms;
+function displayTime(ms, isLaunch) {
+  return isHalfLap(ms, isLaunch) ? ms*2 : ms;
 }
 
 // ── SETTINGS ──
-const slider = document.getElementById('threshold-slider');
-slider.addEventListener('input', () => {
-  const v = parseFloat(slider.value);
-  document.getElementById('threshold-display').textContent = v.toFixed(1) + 's';
+document.getElementById('threshold-slider').addEventListener('input', function() {
+  document.getElementById('threshold-display').textContent = parseFloat(this.value).toFixed(1)+'s';
 });
 
 function startSession() {
   state.names.a = document.getElementById('name-a').value.trim() || 'Coureur A';
   state.names.b = document.getElementById('name-b').value.trim() || 'Coureur B';
-  state.threshold = parseFloat(slider.value);
+  state.threshold = parseFloat(document.getElementById('threshold-slider').value);
+  state.veloLen = parseFloat(document.getElementById('velodrome-len').value) || 250;
+  state.raceDist = parseFloat(document.getElementById('race-dist').value) || 4000;
   document.getElementById('tab-label-a').textContent = state.names.a;
   document.getElementById('tab-label-b').textContent = state.names.b;
-  // Reset riders
-  ['a','b'].forEach(r => {
-    state.riders[r] = { running: false, startTime: null, lapStart: null, laps: [], pausedMs: 0 };
-  });
-  state.sessionStart = performance.now();
+  ['a','b'].forEach(r => { state.riders[r] = {running:false,startTime:null,lapStart:null,laps:[],pausedMs:0}; });
+  state.comp = {running:false,startTime:null,lapStart:null,pausedMs:0,segments:[]};
   state.activeTab = 'a';
   switchTab('a');
   showScreen('s-dashboard');
-  tickSession();
 }
 
 function goSettings() {
-  // Stop everything
   ['a','b'].forEach(r => {
     const rider = state.riders[r];
-    if (rider.running) {
-      rider.pausedMs += performance.now() - rider.startTime;
-      rider.running = false;
-    }
+    if(rider.running) { rider.pausedMs += performance.now()-rider.startTime; rider.running=false; }
   });
-  cancelAnimationFrame(state.sessionRaf);
+  const c = state.comp;
+  if(c.running) { c.pausedMs += performance.now()-c.startTime; c.running=false; }
   showScreen('s-settings');
 }
 
-// ── CHRONO EFFORT PAR COUREUR ──
+// ── EFFORT ELAPSED ──
 function getRiderElapsed(r) {
-  if (!r.startTime && r.pausedMs === 0) return 0;
-  return r.pausedMs + (r.running ? (performance.now() - r.startTime) : 0);
-}
-
-function fmtEffort(ms) {
-  const s = Math.floor(ms / 1000);
-  return String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
-}
-
-// ── SESSION TIMER (gardé pour tickSession) ──
-function tickSession() {
-  // no-op, remplacé par globalTick
+  if(!r.startTime && r.pausedMs===0) return 0;
+  return r.pausedMs + (r.running ? (performance.now()-r.startTime) : 0);
 }
 
 // ── TABS ──
 function switchTab(t) {
   state.activeTab = t;
-  document.getElementById('tab-a').className = 'tab' + (t === 'a' ? ' active-a' : '');
-  document.getElementById('tab-b').className = 'tab' + (t === 'b' ? ' active-b' : '');
-  updateDashboard();
+  document.getElementById('tab-a').className = 'tab'+(t==='a'?' active-a':'');
+  document.getElementById('tab-b').className = 'tab'+(t==='b'?' active-b':'');
+  document.getElementById('tab-c').className = 'tab'+(t==='c'?' active-c':'');
+  document.getElementById('dash-normal').style.display = t!=='c' ? 'flex' : 'none';
+  document.getElementById('dash-comp').style.display   = t==='c' ? 'flex' : 'none';
+  if(t!=='c') updateDashboard();
+  else updateComp();
 }
 
-// ── BOUCLE GLOBALE ──
+// ── GLOBAL TICK ──
 function globalTick() {
   const dash = document.getElementById('s-dashboard').classList.contains('active');
   const fs   = document.getElementById('s-fullscreen').classList.contains('active');
-  if (dash) {
-    // Chrono effort du coureur actif
-    const r = state.riders[state.activeTab];
-    document.getElementById('session-timer').textContent = fmtEffort(getRiderElapsed(r));
+  const t = state.activeTab;
+  if(dash) {
+    let elapsed = 0;
+    if(t==='c') elapsed = getRiderElapsed(state.comp);
+    else elapsed = getRiderElapsed(state.riders[t]);
+    document.getElementById('session-timer').textContent = fmtMSS(elapsed);
   }
-  if (fs) {
+  if(fs) {
     updateFs();
-    // Chrono effort en plein écran
-    const r = state.riders[state.activeTab];
-    document.getElementById('fs-effort').textContent = fmtEffort(getRiderElapsed(r));
+    let elapsed = 0;
+    if(t==='c') elapsed = getRiderElapsed(state.comp);
+    else elapsed = getRiderElapsed(state.riders[t]);
+    document.getElementById('fs-effort').textContent = fmtMSS(elapsed);
   }
   requestAnimationFrame(globalTick);
 }
 requestAnimationFrame(globalTick);
 
-// ── TIMER ──
+// ── RIDERS A/B ──
 function toggleTimer() {
   const r = state.riders[state.activeTab];
-  if (!r.running) {
-    r.running = true;
-    r.startTime = performance.now();
-    if (!r.lapStart) r.lapStart = performance.now();
-    else r.lapStart = performance.now() - (r._pausedLapMs || 0);
-    updateControls();
+  if(!r.running) {
+    r.running=true; r.startTime=performance.now();
+    if(!r.lapStart) r.lapStart=performance.now();
+    else r.lapStart = performance.now()-(r._pausedLapMs||0);
   } else {
-    r._pausedLapMs = performance.now() - r.lapStart;
-    r.pausedMs += performance.now() - r.startTime;
-    r.running = false;
-    updateControls();
+    r._pausedLapMs = performance.now()-r.lapStart;
+    r.pausedMs += performance.now()-r.startTime;
+    r.running=false;
   }
+  updateDashboard();
 }
 
 function recordLap() {
   const t = state.activeTab;
   const r = state.riders[t];
-  if (!r.running) return;
+  if(!r.running) return;
   const now = performance.now();
-  const lapMs = now - r.lapStart;
+  const lapMs = now-r.lapStart;
   r.lapStart = now;
-  const half = isHalfLap(lapMs);
-  r.laps.push({ n: r.laps.length + 1, real: lapMs, half });
-  updateDashboard(); // met à jour historique immédiatement
-  if (document.getElementById('s-fullscreen').classList.contains('active')) {
-    flashFs(t);
-  }
+  const half = isHalfLap(lapMs, false);
+  r.laps.push({n:r.laps.length+1, real:lapMs, half});
+  updateDashboard();
+  if(document.getElementById('s-fullscreen').classList.contains('active')) flashFs(t);
 }
 
 function resetCurrent() {
   const t = state.activeTab;
-  state.riders[t] = { running: false, startTime: null, lapStart: null, laps: [], pausedMs: 0 };
+  state.riders[t] = {running:false,startTime:null,lapStart:null,laps:[],pausedMs:0};
   updateDashboard();
-  updateControls();
 }
 
-// Mise à jour complète : stats + historique + contrôles (appelée sur événement)
 function updateDashboard() {
   const t = state.activeTab;
+  if(t==='c') return;
   const r = state.riders[t];
-  const color = t === 'a' ? 'a' : 'b';
+  const color = t;
 
-  // Stat: laps
   document.getElementById('stat-laps').textContent = r.laps.length;
+  document.getElementById('stat-best').textContent = r.laps.length>0 ? fmtLapFull(Math.min(...r.laps.map(l=>l.real))) : '—';
 
-  // Stat: best
-  if (r.laps.length > 0) {
-    const best = Math.min(...r.laps.map(l => l.real));
-    document.getElementById('stat-best').textContent = fmtLapFull(best);
-  } else {
-    document.getElementById('stat-best').textContent = '—';
-  }
-
-  // Last lap card
   const card = document.getElementById('last-lap-card');
-  card.className = 'last-lap-card color-' + color;
+  card.className = 'last-lap-card color-'+color;
   const ltEl = document.getElementById('last-lap-time');
   const metaEl = document.getElementById('last-lap-meta');
 
-  if (r.laps.length === 0) {
-    ltEl.className = 'last-lap-time no-data color-' + color;
-    ltEl.textContent = '— —';
-    metaEl.innerHTML = '';
+  if(r.laps.length===0) {
+    ltEl.className='last-lap-time no-data color-'+color; ltEl.textContent='— —'; metaEl.innerHTML='';
   } else {
-    const last = r.laps[r.laps.length - 1];
-    const disp = displayTime(last.real);
-    ltEl.className = 'last-lap-time color-' + color;
-    ltEl.textContent = fmtLap(disp) + 's';
-    let meta = '<span>Tour ' + last.n + '</span>';
-    if (last.half) meta += '<span class="x2-badge">× 2 affiché</span>';
-    meta += '<span>réel: ' + fmtLapFull(last.real) + '</span>';
+    const last = r.laps[r.laps.length-1];
+    const disp = displayTime(last.real, false);
+    ltEl.className='last-lap-time color-'+color;
+    ltEl.textContent = fmtLap(disp)+'s';
+    let meta = '<span>Tour '+last.n+'</span>';
+    if(last.half) meta += '<span class="x2-badge">× 2 affiché</span>';
+    meta += '<span>réel: '+fmtLapFull(last.real)+'</span>';
     metaEl.innerHTML = meta;
   }
 
-  // Controls color
   const btnLap = document.getElementById('btn-lap');
-  btnLap.className = 'btn-main btn-lap-dash' + (color === 'a' ? ' color-a' : '');
-
-  // History
-  renderHistory(t);
-
-  // Controls state
-  updateControls();
-}
-
-function updateControls() {
-  const r = state.riders[state.activeTab];
+  btnLap.className = 'btn-main btn-lap-dash'+(color==='a'?' color-a':'');
   const btn = document.getElementById('btn-startstop');
-  const btnLap = document.getElementById('btn-lap');
-  if (r.running) {
-    btn.textContent = '⏸ Pause';
-    btn.className = 'btn-main btn-stop';
-    btnLap.disabled = false;
-    btnLap.style.opacity = '1';
-  } else {
-    btn.textContent = r.laps.length > 0 || r.pausedMs > 0 ? '▶ Reprendre' : '▶ Démarrer';
-    btn.className = 'btn-main btn-go';
-    btnLap.disabled = true;
-    btnLap.style.opacity = '0.35';
-  }
+  if(r.running) { btn.textContent='⏸ Pause'; btn.className='btn-main btn-stop'; btnLap.disabled=false; btnLap.style.opacity='1'; }
+  else { btn.textContent=r.laps.length>0||r.pausedMs>0?'▶ Reprendre':'▶ Démarrer'; btn.className='btn-main btn-go'; btnLap.disabled=true; btnLap.style.opacity='0.35'; }
+
+  renderHistory(t);
 }
 
 function renderHistory(t) {
   const r = state.riders[t];
   const el = document.getElementById('history-list');
-  if (r.laps.length === 0) {
-    el.innerHTML = '<div class="empty-history">Aucun tour enregistré</div>';
-    return;
+  if(r.laps.length===0) { el.innerHTML='<div class="empty-history">Aucun tour enregistré</div>'; return; }
+  const reals = r.laps.map(l=>l.real);
+  const best=Math.min(...reals), worst=Math.max(...reals), avg=reals.reduce((a,b)=>a+b,0)/reals.length;
+  let html='';
+  for(let i=r.laps.length-1;i>=0;i--) {
+    const l=r.laps[i];
+    const isBest=reals.length>1&&l.real===best, isWorst=reals.length>1&&l.real===worst;
+    let cls='lap-row'; if(isBest)cls+=' best'; if(isWorst)cls+=' worst';
+    const diff=l.real-avg;
+    let diffHtml=reals.length>1?'<span class="lap-diff '+(diff<0?'faster':'slower')+'">'+(diff<0?'-':'+')+fmtLapFull(Math.abs(diff))+'</span>':'';
+    let tagHtml=isBest?'<span class="lap-tag best">Meilleur</span>':isWorst?'<span class="lap-tag worst">Moins bon</span>':'';
+    const x2=l.half?'<span class="lap-x2">½</span>':'';
+    html+='<div class="'+cls+'"><span class="lap-num">Tour '+l.n+'</span><span class="lap-split">'+fmtLapFull(l.real)+' '+x2+'</span><span class="lap-right">'+diffHtml+tagHtml+'</span></div>';
   }
-  const reals = r.laps.map(l => l.real);
-  const best = Math.min(...reals);
-  const worst = Math.max(...reals);
-  const avg = reals.reduce((a,b)=>a+b,0) / reals.length;
-  let html = '';
-  for (let i = r.laps.length - 1; i >= 0; i--) {
-    const l = r.laps[i];
-    const isBest = reals.length > 1 && l.real === best;
-    const isWorst = reals.length > 1 && l.real === worst;
-    let cls = 'lap-row';
-    if (isBest) cls += ' best';
-    if (isWorst) cls += ' worst';
-    const diff = l.real - avg;
-    let diffHtml = '';
-    if (reals.length > 1) {
-      const sign = diff < 0 ? '-' : '+';
-      const dc = diff < 0 ? 'faster' : 'slower';
-      diffHtml = '<span class="lap-diff ' + dc + '">' + sign + fmtLapFull(Math.abs(diff)) + '</span>';
+  el.innerHTML=html;
+}
+
+// ── COMPÉTITION ──
+// Structure des distances:
+// Segment 0 (launch1): 0 → veloLen*0.75  (¾ tour)
+// Segment 1 (launch2): veloLen*0.75 → veloLen*0.75+veloLen (1 tour)  = veloLen*1.75
+// Segment 2+ : demi-tour (veloLen/2) ou tour (veloLen) selon seuil
+// Distance cumulée après n segments depuis le début
+
+function getSegmentDist(segIndex, isHalf) {
+  if(segIndex===0) return state.veloLen * 0.75;
+  if(segIndex===1) return state.veloLen;
+  return isHalf ? state.veloLen/2 : state.veloLen;
+}
+
+function getCompCumulDist() {
+  let d=0;
+  state.comp.segments.forEach((s,i)=>{ d+=getSegmentDist(i,s.isHalf); });
+  return d;
+}
+
+function calcPronostic() {
+  const segs = state.comp.segments;
+  if(segs.length<2) return null; // pas assez de données
+  const last = segs[segs.length-1];
+  if(last.isLaunch) return null; // encore en phase de lancement
+  const cumulDist = getCompCumulDist();
+  const cumulMs = getRiderElapsed(state.comp);
+  const remaining = state.raceDist - cumulDist;
+  if(remaining<=0) return { finalMs: cumulMs, pct:100, cumulDist, remaining:0 };
+  // Vitesse sur le dernier segment (m/ms)
+  const lastDist = getSegmentDist(segs.length-1, last.isHalf);
+  const speed = lastDist / last.realMs; // m/ms
+  const timeRemaining = remaining / speed;
+  return { finalMs: cumulMs+timeRemaining, pct: Math.min(100, cumulDist/state.raceDist*100), cumulDist, remaining };
+}
+
+function toggleCompTimer() {
+  const c = state.comp;
+  if(!c.running) {
+    c.running=true; c.startTime=performance.now();
+    if(!c.lapStart) c.lapStart=performance.now();
+    else c.lapStart = performance.now()-(c._pausedLapMs||0);
+  } else {
+    c._pausedLapMs = performance.now()-c.lapStart;
+    c.pausedMs += performance.now()-c.startTime;
+    c.running=false;
+  }
+  updateComp();
+}
+
+function recordCompLap() {
+  const c = state.comp;
+  if(!c.running) return;
+  const now = performance.now();
+  const segMs = now-c.lapStart;
+  c.lapStart = now;
+  const idx = c.segments.length;
+  const isLaunch = idx < 2;
+  const isHalf = isHalfLap(segMs, isLaunch);
+  c.segments.push({ realMs:segMs, isHalf, isLaunch });
+  updateComp();
+  if(document.getElementById('s-fullscreen').classList.contains('active')) flashFs('c');
+}
+
+function resetComp() {
+  state.comp = {running:false,startTime:null,lapStart:null,pausedMs:0,segments:[]};
+  updateComp();
+}
+
+function updateComp() {
+  const c = state.comp;
+  const segs = c.segments;
+  const cumulDist = getCompCumulDist();
+
+  // Stats
+  document.getElementById('comp-dist').textContent = Math.round(cumulDist)+'m';
+  document.getElementById('comp-clicks').textContent = segs.length;
+
+  // Dernier segment
+  const ltEl = document.getElementById('comp-last-time');
+  const metaEl = document.getElementById('comp-last-meta');
+  if(segs.length===0) {
+    ltEl.className='last-lap-time no-data color-c'; ltEl.textContent='— —'; metaEl.innerHTML='';
+  } else {
+    const last = segs[segs.length-1];
+    const disp = last.isLaunch ? last.realMs : displayTime(last.realMs, false);
+    ltEl.className='last-lap-time color-c';
+    ltEl.textContent = fmtLap(disp)+'s';
+    const segDist = getSegmentDist(segs.length-1, last.isHalf);
+    let meta = '<span>Segment '+(segs.length)+'</span>';
+    meta += '<span>'+Math.round(segDist)+'m</span>';
+    if(last.isLaunch) meta += '<span class="lap-tag launch" style="display:inline-block;">Lancement</span>';
+    else if(last.isHalf) meta += '<span class="x2-badge">× 2 affiché</span>';
+    meta += '<span>réel: '+fmtLapFull(last.realMs)+'</span>';
+    metaEl.innerHTML = meta;
+  }
+
+  // Pronostic
+  const prono = calcPronostic();
+  const pronoEl = document.getElementById('prono-time');
+  const pronoMeta = document.getElementById('prono-meta');
+  const pronoBar = document.getElementById('prono-bar');
+  if(!prono) {
+    pronoEl.className='prono-time no-data'; pronoEl.textContent='— —';
+    pronoMeta.innerHTML='<span>En attente de données…</span>';
+    pronoBar.style.width='0%';
+  } else {
+    pronoEl.className='prono-time';
+    pronoEl.textContent = fmtMMSS(prono.finalMs);
+    const km = (prono.cumulDist/1000).toFixed(2);
+    pronoMeta.innerHTML='<span>'+km+' km parcourus</span><span>'+(Math.round(prono.remaining))+'m restants</span>';
+    pronoBar.style.width = prono.pct+'%';
+    // Mettre à jour plein écran si actif
+    if(document.getElementById('s-fullscreen').classList.contains('active') && state.activeTab==='c') {
+      document.getElementById('fs-prono-time').textContent = fmtMMSS(prono.finalMs);
+      document.getElementById('fs-prono-dist').textContent = Math.round(cumulDist)+'m / '+state.raceDist+'m';
     }
-    let tagHtml = '';
-    if (isBest) tagHtml = '<span class="lap-tag best">Meilleur</span>';
-    else if (isWorst) tagHtml = '<span class="lap-tag worst">Moins bon</span>';
-    const x2html = l.half ? '<span class="lap-x2">½</span>' : '';
-    html += '<div class="' + cls + '">' +
-      '<span class="lap-num">Tour ' + l.n + '</span>' +
-      '<span class="lap-split">' + fmtLapFull(l.real) + ' ' + x2html + '</span>' +
-      '<span class="lap-right">' + diffHtml + tagHtml + '</span>' +
-      '</div>';
   }
-  el.innerHTML = html;
+
+  // Controls
+  const btnStart = document.getElementById('comp-startstop');
+  const btnLap = document.getElementById('comp-lap');
+  if(c.running) { btnStart.textContent='⏸ Pause'; btnStart.className='btn-main btn-stop'; btnLap.disabled=false; btnLap.style.opacity='1'; }
+  else { btnStart.textContent=segs.length>0||c.pausedMs>0?'▶ Reprendre':'▶ Démarrer'; btnStart.className='btn-main btn-go'; btnLap.disabled=true; btnLap.style.opacity='0.35'; }
+
+  renderCompHistory();
+}
+
+function renderCompHistory() {
+  const segs = state.comp.segments;
+  const el = document.getElementById('comp-history');
+  if(segs.length===0) { el.innerHTML='<div class="empty-history">Aucun segment</div>'; return; }
+  // Calc stats sur segments réguliers seulement
+  const regular = segs.filter(s=>!s.isLaunch);
+  const rTimes = regular.map(s=>s.realMs);
+  const best=rTimes.length>0?Math.min(...rTimes):null, worst=rTimes.length>0?Math.max(...rTimes):null;
+  let html='', cumul=0;
+  for(let i=segs.length-1;i>=0;i--) {
+    const s=segs[i];
+    const dist=getSegmentDist(i,s.isHalf);
+    cumul=getCompCumulDistUpTo(i);
+    const isBest=!s.isLaunch&&rTimes.length>1&&s.realMs===best;
+    const isWorst=!s.isLaunch&&rTimes.length>1&&s.realMs===worst;
+    let cls='lap-row'; if(s.isLaunch)cls+=' launch'; else if(isBest)cls+=' best'; else if(isWorst)cls+=' worst';
+    const disp = s.isLaunch ? s.realMs : displayTime(s.realMs, false);
+    let tag='';
+    if(s.isLaunch) tag='<span class="lap-tag launch">Lance.</span>';
+    else if(isBest) tag='<span class="lap-tag best">Meil.</span>';
+    else if(isWorst) tag='<span class="lap-tag worst">Moins bon</span>';
+    const x2=(!s.isLaunch&&s.isHalf)?'<span class="lap-x2">½</span>':'';
+    const distLabel = Math.round(getCompCumulDistUpTo(i+1))+'m';
+    html+='<div class="'+cls+'"><span class="lap-num" style="min-width:50px;">Seg '+(i+1)+'</span><span class="lap-split">'+fmtLapFull(disp)+' '+x2+'</span><span class="lap-right">'+tag+'<span style="font-size:11px;color:var(--muted);">'+distLabel+'</span></span></div>';
+  }
+  el.innerHTML=html;
+}
+
+function getCompCumulDistUpTo(n) {
+  let d=0;
+  for(let i=0;i<n&&i<state.comp.segments.length;i++) d+=getSegmentDist(i,state.comp.segments[i].isHalf);
+  return d;
 }
 
 // ── FULLSCREEN ──
-let lastTap = 0;
-let dropAlert = false;
+let lastTap=0, dropAlert=false;
 
 function openFullscreen() {
-  dropAlert = false;
-  const fs = document.getElementById('s-fullscreen');
+  dropAlert=false;
+  const fs=document.getElementById('s-fullscreen');
   fs.classList.remove('alert');
   document.getElementById('btn-drop').classList.remove('active');
+  document.getElementById('btn-drop').textContent='⚠ Un lâché';
+  const t=state.activeTab;
+  const isComp = t==='c';
+  document.getElementById('fs-name').textContent = isComp ? 'COMPÉTITION' : state.names[t].toUpperCase();
+  document.getElementById('fs-time').className = 'fs-time color-'+(isComp?'c':t);
+  document.getElementById('fs-unit').textContent = isComp ? 'pronostic' : 'secondes';
+  document.getElementById('fs-prono-box').style.display = isComp ? 'block' : 'none';
+  document.getElementById('btn-drop').style.display = isComp ? 'none' : 'block';
+  document.getElementById('fs-effort-label').textContent = isComp ? 'Temps' : 'Effort';
   showScreen('s-fullscreen');
-  const t = state.activeTab;
-  document.getElementById('fs-name').textContent = state.names[t].toUpperCase();
-  document.getElementById('fs-time').className = 'fs-time color-' + t;
   updateFs();
   setupFsTap();
 }
 
 function toggleDrop(e) {
   e.stopPropagation();
-  dropAlert = !dropAlert;
-  const fs = document.getElementById('s-fullscreen');
-  const btn = document.getElementById('btn-drop');
-  if (dropAlert) {
-    fs.classList.add('alert');
-    btn.classList.add('active');
-    btn.textContent = '✓ Retour normal';
-  } else {
-    fs.classList.remove('alert');
-    btn.classList.remove('active');
-    btn.textContent = '⚠ Un lâché';
-  }
+  dropAlert=!dropAlert;
+  const fs=document.getElementById('s-fullscreen');
+  const btn=document.getElementById('btn-drop');
+  if(dropAlert) { fs.classList.add('alert'); btn.classList.add('active'); btn.textContent='✓ Retour normal'; }
+  else { fs.classList.remove('alert'); btn.classList.remove('active'); btn.textContent='⚠ Un lâché'; }
 }
 
 function updateFs() {
   const t = state.activeTab;
-  const r = state.riders[t];
-  if (r.laps.length === 0) {
-    document.getElementById('fs-time').textContent = '—';
-    document.getElementById('fs-x2').textContent = '';
-    return;
+  const isComp = t==='c';
+  if(isComp) {
+    const segs=state.comp.segments;
+    if(segs.length===0) { document.getElementById('fs-time').textContent='—'; return; }
+    const last=segs[segs.length-1];
+    const disp = last.isLaunch ? last.realMs : displayTime(last.realMs, false);
+    document.getElementById('fs-time').textContent = fmtLap(disp);
+    const prono=calcPronostic();
+    if(prono) {
+      document.getElementById('fs-prono-time').textContent = fmtMMSS(prono.finalMs);
+      document.getElementById('fs-prono-dist').textContent = Math.round(getCompCumulDist())+'m / '+state.raceDist+'m';
+    } else {
+      document.getElementById('fs-prono-time').textContent = '—';
+      document.getElementById('fs-prono-dist').textContent = 'En attente…';
+    }
+  } else {
+    const r=state.riders[t];
+    if(r.laps.length===0) { document.getElementById('fs-time').textContent='—'; return; }
+    const last=r.laps[r.laps.length-1];
+    document.getElementById('fs-time').textContent = fmtLap(displayTime(last.real, false));
   }
-  const last = r.laps[r.laps.length - 1];
-  const disp = displayTime(last.real);
-  document.getElementById('fs-time').textContent = fmtLap(disp);
-  document.getElementById('fs-x2').textContent = last.half ? '× 2  (demi-tour détecté)' : '';
 }
 
 function flashFs(t) {
-  const el = document.getElementById('fs-time');
+  const el=document.getElementById('fs-time');
   el.classList.add('flash');
-  setTimeout(() => el.classList.remove('flash'), 180);
+  setTimeout(()=>el.classList.remove('flash'),180);
   updateFs();
+  if(t==='c') updateComp();
 }
 
 function setupFsTap() {
-  const zone = document.getElementById('fs-tap-zone');
-  zone.ontouchend = handleFsTap;
-  zone.onclick = handleFsTap;
+  const zone=document.getElementById('fs-tap-zone');
+  zone.ontouchend=handleFsTap; zone.onclick=handleFsTap;
 }
 
 function handleFsTap(e) {
   e.preventDefault();
-  const now = Date.now();
-  const delta = now - lastTap;
-  if (delta < 350 && delta > 0) {
-    // double tap → retour dashboard, annule le lap prévu
-    lastTap = 0;
+  const now=Date.now(), delta=now-lastTap;
+  if(delta<350&&delta>0) {
+    lastTap=0;
     showScreen('s-dashboard');
-    updateDashboard();
+    if(state.activeTab==='c') updateComp(); else updateDashboard();
   } else {
-    lastTap = now;
-    // single tap → passage, seulement si pas suivi d'un 2e tap
-    setTimeout(() => {
-      if (lastTap === now) {
-        // pas eu de 2e tap → c'est bien un simple tap
-        recordLap();
+    lastTap=now;
+    setTimeout(()=>{
+      if(lastTap===now) {
+        if(state.activeTab==='c') recordCompLap(); else recordLap();
       }
-      // si lastTap != now → double tap détecté entre-temps, on ne fait rien
-    }, 360);
+    },360);
   }
 }
 
 // ── EXPORT ──
 function exportData() {
-  const ts = new Date().toLocaleString('fr-FR');
-  let txt = '=== Chrono Vélodrome ===\n';
-  txt += 'Session du ' + ts + '\n';
-  txt += 'Seuil demi-tour: ' + state.threshold + 's\n\n';
-  ['a','b'].forEach(t => {
-    const r = state.riders[t];
-    txt += '── ' + state.names[t] + ' ──\n';
-    if (r.laps.length === 0) { txt += 'Aucun tour\n\n'; return; }
-    r.laps.forEach(l => {
-      txt += 'Tour ' + l.n + ': ' + fmtLapFull(l.real);
-      if (l.half) txt += ' [×2 → ' + fmtLapFull(l.real * 2) + ']';
-      txt += '\n';
-    });
-    const reals = r.laps.map(l => l.real);
-    txt += 'Meilleur: ' + fmtLapFull(Math.min(...reals)) + '\n';
-    txt += 'Moyenne: ' + fmtLapFull(reals.reduce((a,b)=>a+b,0)/reals.length) + '\n\n';
+  const ts=new Date().toLocaleString('fr-FR');
+  let txt='=== Chrono Vélodrome ===\nSession du '+ts+'\nSeuil: '+state.threshold+'s\n\n';
+  ['a','b'].forEach(t=>{
+    const r=state.riders[t];
+    txt+='── '+state.names[t]+' ──\n';
+    if(r.laps.length===0){txt+='Aucun tour\n\n';return;}
+    r.laps.forEach(l=>{txt+='Tour '+l.n+': '+fmtLapFull(l.real)+(l.half?' [×2 → '+fmtLapFull(l.real*2)+']':'')+'\n';});
+    const reals=r.laps.map(l=>l.real);
+    txt+='Meilleur: '+fmtLapFull(Math.min(...reals))+'\nMoyenne: '+fmtLapFull(reals.reduce((a,b)=>a+b,0)/reals.length)+'\n\n';
   });
-
-  if (navigator.share) {
-    navigator.share({ title: 'Chrono Vélodrome', text: txt }).catch(() => copyToClipboard(txt));
-  } else {
-    copyToClipboard(txt);
+  const c=state.comp;
+  txt+='── Compétition ('+state.raceDist+'m / vélodrome '+state.veloLen+'m) ──\n';
+  if(c.segments.length===0){txt+='Aucun segment\n';}
+  else {
+    c.segments.forEach((s,i)=>{
+      const dist=getSegmentDist(i,s.isHalf);
+      txt+='Seg '+(i+1)+' ('+Math.round(dist)+'m): '+fmtLapFull(s.realMs)+(s.isLaunch?' [lancement]':s.isHalf?' [demi-tour]':'')+'\n';
+    });
+    const prono=calcPronostic();
+    if(prono) txt+='\nPronostic final: '+fmtMMSS(prono.finalMs)+'\n';
   }
+  if(navigator.share) navigator.share({title:'Chrono Vélodrome',text:txt}).catch(()=>copyToClipboard(txt));
+  else copyToClipboard(txt);
 }
 
 function copyToClipboard(txt) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(() => showToast('Copié dans le presse-papier ✓'));
-  } else {
-    const ta = document.createElement('textarea');
-    ta.value = txt;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('Copié dans le presse-papier ✓');
-  }
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>showToast('Copié ✓'));
+  else { const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('Copié ✓'); }
 }
-
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
-
-// ── SCREENS ──
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ── BLUETOOTH STICK — API GAMEPAD ──
-// Le stick se connecte comme une manette : on poll les boutons à chaque frame
-let gpPrevPressed = false;
-
+// ── BLUETOOTH ──
+let gpPrevPressed=false;
 function pollGamepad() {
-  const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-  let anyPressed = false;
-  for (const gp of gamepads) {
-    if (!gp) continue;
-    // On écoute tous les boutons du stick
-    for (const btn of gp.buttons) {
-      if (btn.pressed) { anyPressed = true; break; }
-    }
-    if (anyPressed) break;
+  const gps=navigator.getGamepads?navigator.getGamepads():[];
+  let any=false;
+  for(const gp of gps){if(!gp)continue;for(const b of gp.buttons)if(b.pressed){any=true;break;}if(any)break;}
+  if(any&&!gpPrevPressed){
+    const fs=document.getElementById('s-fullscreen').classList.contains('active');
+    const dash=document.getElementById('s-dashboard').classList.contains('active');
+    if(fs||dash){if(state.activeTab==='c')recordCompLap();else recordLap();}
+    if(fs)flashFs(state.activeTab);
   }
-  // Déclenche sur front montant (appui, pas maintien)
-  if (anyPressed && !gpPrevPressed) {
-    const fs = document.getElementById('s-fullscreen').classList.contains('active');
-    const dash = document.getElementById('s-dashboard').classList.contains('active');
-    if (fs) { recordLap(); flashFs(state.activeTab); }
-    else if (dash) { recordLap(); }
-  }
-  gpPrevPressed = anyPressed;
+  gpPrevPressed=any;
   requestAnimationFrame(pollGamepad);
 }
 requestAnimationFrame(pollGamepad);
+window.addEventListener('gamepadconnected',e=>showToast('🎮 Stick: '+e.gamepad.id.substring(0,20)));
 
-window.addEventListener('gamepadconnected', e => {
-  showToast('🎮 Stick connecté : ' + e.gamepad.id.substring(0, 30));
-});
-
-// ── BLUETOOTH STICK — ShiftLeft ──
-document.addEventListener('keydown', e => {
-  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    const fs   = document.getElementById('s-fullscreen').classList.contains('active');
-    const dash = document.getElementById('s-dashboard').classList.contains('active');
-    if (fs) { recordLap(); flashFs(state.activeTab); }
-    else if (dash) { recordLap(); }
+document.addEventListener('keydown',e=>{
+  if(e.code==='ShiftLeft'||e.code==='ShiftRight'){
+    e.preventDefault(); e.stopImmediatePropagation();
+    const fs=document.getElementById('s-fullscreen').classList.contains('active');
+    const dash=document.getElementById('s-dashboard').classList.contains('active');
+    if(fs||dash){if(state.activeTab==='c')recordCompLap();else recordLap();}
+    if(fs)flashFs(state.activeTab);
   }
-}, true);
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-}
+},true);
 
-// Empêcher tous les éléments de recevoir le focus clavier (évite navigation Shift+Tab)
-document.querySelectorAll('button, input').forEach(el => el.setAttribute('tabindex', '-1'));
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+document.querySelectorAll('button,input[type=range]').forEach(el=>el.setAttribute('tabindex','-1'));
 </script>
 </body>
 </html>
