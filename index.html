@@ -217,9 +217,15 @@
 <!-- DASHBOARD -->
 <div class="screen" id="s-dashboard">
   <div class="dash-header">
-    <div>
-      <div class="effort-label">Effort en cours</div>
-      <div class="session-timer" id="session-timer">00:00</div>
+    <div style="display:flex;gap:16px;align-items:flex-end;">
+      <div>
+        <div class="effort-label">Effort en cours</div>
+        <div class="session-timer" id="session-timer">00:00</div>
+      </div>
+      <div>
+        <div class="effort-label">Tour en cours</div>
+        <div class="session-timer" id="lap-timer" style="color:var(--muted);">00:00</div>
+      </div>
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn-export" onclick="exportData()">⬆ Export</button>
@@ -324,9 +330,15 @@
   <div class="fs-tap-zone" id="fs-tap-zone"></div>
   <div class="fs-topbar">
     <div class="fs-name" id="fs-name">COUREUR A</div>
-    <div class="fs-effort-box">
-      <div class="fs-effort-label" id="fs-effort-label">Effort</div>
-      <div class="fs-effort" id="fs-effort">00:00</div>
+    <div style="display:flex;gap:16px;align-items:flex-start;">
+      <div class="fs-effort-box" style="text-align:right;">
+        <div class="fs-effort-label">Tour</div>
+        <div class="fs-effort" id="fs-lap-timer">00:00</div>
+      </div>
+      <div class="fs-effort-box" style="text-align:right;">
+        <div class="fs-effort-label" id="fs-effort-label">Effort</div>
+        <div class="fs-effort" id="fs-effort">00:00</div>
+      </div>
     </div>
   </div>
   <!-- Pronostic (visible seulement en mode compétition) -->
@@ -552,15 +564,49 @@ function renderHistory(t) {
 // Segment 2+ : demi-tour (veloLen/2) ou tour (veloLen) selon seuil
 // Distance cumulée après n segments depuis le début
 
-function getSegmentDist(segIndex, isHalf) {
-  if(segIndex===0) return state.veloLen * 0.75;
-  if(segIndex===1) return state.veloLen;
-  return isHalf ? state.veloLen/2 : state.veloLen;
+// ── COMPÉTITION : logique des distances ──
+// Phase de lancement : on trace les jalons atteints (0m, 187.5m, 437.5m)
+// Clic < seuil pendant phase lancement = clic intermédiaire
+//   - Avant jalon 187.5m : 62.5m (¼ tour), affichage réel
+//   - Entre 187.5m et 437.5m : 312.5m (= 187.5 + 125m), affichage × 2
+
+function getSegmentInfo(segIndex, realMs) {
+  const c = state.comp;
+  const velo = state.veloLen;
+  const half = state.threshold > 0 && (realMs/1000) < state.threshold;
+
+  // Reconstruire l'état des jalons atteints AVANT ce segment
+  let jalon = 0; // 0=départ, 1=187.5 atteint, 2=437.5 atteint (phase régulière)
+  for(let i=0;i<segIndex;i++) {
+    const s = c.segments[i];
+    if(jalon===0 && !s.isSubLaunch) jalon=1;      // premier clic non-sub = 187.5 atteint
+    else if(jalon===1 && !s.isSubLaunch) jalon=2;  // deuxième clic non-sub = 437.5 atteint
+  }
+
+  if(jalon===2) {
+    // Phase régulière
+    const distM = half ? velo/2 : velo;
+    return { distM, isLaunch:false, isSubLaunch:false, isHalf:half, displayX2:half };
+  }
+  if(jalon===1) {
+    // Entre 187.5m et 437.5m
+    if(half) return { distM:velo/2, isLaunch:true, isSubLaunch:true, isHalf:true, displayX2:true };  // 312.5m (×2 affiché)
+    return { distM:velo, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false }; // 437.5m
+  }
+  // jalon===0 : avant 187.5m
+  if(half) return { distM:velo/4, isLaunch:true, isSubLaunch:true, isHalf:false, displayX2:false }; // 62.5m (réel)
+  return { distM:velo*0.75, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false }; // 187.5m
 }
 
 function getCompCumulDist() {
   let d=0;
-  state.comp.segments.forEach((s,i)=>{ d+=getSegmentDist(i,s.isHalf); });
+  state.comp.segments.forEach((s)=>{ d+=s.distM; });
+  return d;
+}
+
+function getCompCumulDistUpTo(n) {
+  let d=0;
+  for(let i=0;i<n&&i<state.comp.segments.length;i++) d+=state.comp.segments[i].distM;
   return d;
 }
 
@@ -568,17 +614,14 @@ function calcPronostic() {
   const segs = state.comp.segments;
   if(segs.length<2) return null;
   const last = segs[segs.length-1];
-  if(last.isLaunch) return null;
+  if(last.isLaunch) return null; // encore en phase lancement
   const cumulDist = getCompCumulDist();
-  // Temps cumulé = somme des temps réels de tous les segments
-  const cumulMs = segs.reduce((sum, s) => sum + s.realMs, 0);
+  const cumulMs = segs.reduce((sum,s)=>sum+s.realMs, 0);
   const remaining = state.raceDist - cumulDist;
-  if(remaining<=0) return { finalMs: cumulMs, pct:100, cumulDist, remaining:0 };
-  // Vitesse sur le dernier segment — toujours temps réel mesuré
-  const lastDist = getSegmentDist(segs.length-1, last.isHalf);
-  const speed = lastDist / last.realMs; // m/ms
+  if(remaining<=0) return { finalMs:cumulMs, pct:100, cumulDist, remaining:0 };
+  const speed = last.distM / last.realMs; // m/ms, toujours temps réel
   const timeRemaining = remaining / speed;
-  return { finalMs: cumulMs+timeRemaining, pct: Math.min(100, cumulDist/state.raceDist*100), cumulDist, remaining };
+  return { finalMs:cumulMs+timeRemaining, pct:Math.min(100, cumulDist/state.raceDist*100), cumulDist, remaining };
 }
 
 function toggleCompTimer() {
@@ -599,12 +642,10 @@ function recordCompLap() {
   const c = state.comp;
   if(!c.running) return;
   const now = performance.now();
-  const segMs = now-c.lapStart;
+  const realMs = now-c.lapStart;
   c.lapStart = now;
-  const idx = c.segments.length;
-  const isLaunch = idx < 2;
-  const isHalf = isHalfLap(segMs, isLaunch);
-  c.segments.push({ realMs:segMs, isHalf, isLaunch });
+  const info = getSegmentInfo(c.segments.length, realMs);
+  c.segments.push({ realMs, ...info });
   updateComp();
   if(document.getElementById('s-fullscreen').classList.contains('active')) flashFs('c');
 }
@@ -619,30 +660,28 @@ function updateComp() {
   const segs = c.segments;
   const cumulDist = getCompCumulDist();
 
-  // Stats
   document.getElementById('comp-dist').textContent = Math.round(cumulDist)+'m';
   document.getElementById('comp-clicks').textContent = segs.length;
 
-  // Dernier segment
   const ltEl = document.getElementById('comp-last-time');
   const metaEl = document.getElementById('comp-last-meta');
   if(segs.length===0) {
     ltEl.className='last-lap-time no-data color-c'; ltEl.textContent='— —'; metaEl.innerHTML='';
   } else {
     const last = segs[segs.length-1];
-    const disp = last.isLaunch ? last.realMs : displayTime(last.realMs, false);
+    const disp = last.displayX2 ? last.realMs*2 : last.realMs;
     ltEl.className='last-lap-time color-c';
     ltEl.textContent = fmtLap(disp)+'s';
-    const segDist = getSegmentDist(segs.length-1, last.isHalf);
-    let meta = '<span>Segment '+(segs.length)+'</span>';
-    meta += '<span>'+Math.round(segDist)+'m</span>';
-    if(last.isLaunch) meta += '<span class="lap-tag launch" style="display:inline-block;">Lancement</span>';
+    let meta = '<span>Segment '+segs.length+'</span>';
+    meta += '<span>'+Math.round(last.distM)+'m</span>';
+    if(last.isSubLaunch && !last.displayX2) meta += '<span class="lap-tag launch" style="display:inline-block;">62.5m</span>';
+    else if(last.isSubLaunch && last.displayX2) meta += '<span class="lap-tag launch" style="display:inline-block;">312.5m ×2</span>';
+    else if(last.isLaunch) meta += '<span class="lap-tag launch" style="display:inline-block;">Lancement</span>';
     else if(last.isHalf) meta += '<span class="x2-badge">× 2 affiché</span>';
     meta += '<span>réel: '+fmtLapFull(last.realMs)+'</span>';
     metaEl.innerHTML = meta;
   }
 
-  // Pronostic
   const prono = calcPronostic();
   const pronoEl = document.getElementById('prono-time');
   const pronoMeta = document.getElementById('prono-meta');
@@ -655,16 +694,14 @@ function updateComp() {
     pronoEl.className='prono-time';
     pronoEl.textContent = fmtMMSS(prono.finalMs);
     const km = (prono.cumulDist/1000).toFixed(2);
-    pronoMeta.innerHTML='<span>'+km+' km parcourus</span><span>'+(Math.round(prono.remaining))+'m restants</span>';
+    pronoMeta.innerHTML='<span>'+km+' km parcourus</span><span>'+Math.round(prono.remaining)+'m restants</span>';
     pronoBar.style.width = prono.pct+'%';
-    // Mettre à jour plein écran si actif
     if(document.getElementById('s-fullscreen').classList.contains('active') && state.activeTab==='c') {
       document.getElementById('fs-prono-time').textContent = fmtMMSS(prono.finalMs);
       document.getElementById('fs-prono-dist').textContent = Math.round(cumulDist)+'m / '+state.raceDist+'m';
     }
   }
 
-  // Controls
   const btnStart = document.getElementById('comp-startstop');
   const btnLap = document.getElementById('comp-lap');
   if(c.running) { btnStart.textContent='⏸ Pause'; btnStart.className='btn-main btn-stop'; btnLap.disabled=false; btnLap.style.opacity='1'; }
@@ -677,35 +714,29 @@ function renderCompHistory() {
   const segs = state.comp.segments;
   const el = document.getElementById('comp-history');
   if(segs.length===0) { el.innerHTML='<div class="empty-history">Aucun segment</div>'; return; }
-  // Calc stats sur segments réguliers seulement
   const regular = segs.filter(s=>!s.isLaunch);
   const rTimes = regular.map(s=>s.realMs);
   const best=rTimes.length>0?Math.min(...rTimes):null, worst=rTimes.length>0?Math.max(...rTimes):null;
-  let html='', cumul=0;
+  let html='';
   for(let i=segs.length-1;i>=0;i--) {
     const s=segs[i];
-    const dist=getSegmentDist(i,s.isHalf);
-    cumul=getCompCumulDistUpTo(i);
     const isBest=!s.isLaunch&&rTimes.length>1&&s.realMs===best;
     const isWorst=!s.isLaunch&&rTimes.length>1&&s.realMs===worst;
     let cls='lap-row'; if(s.isLaunch)cls+=' launch'; else if(isBest)cls+=' best'; else if(isWorst)cls+=' worst';
-    const disp = s.isLaunch ? s.realMs : displayTime(s.realMs, false);
+    const disp = s.displayX2 ? s.realMs*2 : s.realMs;
     let tag='';
-    if(s.isLaunch) tag='<span class="lap-tag launch">Lance.</span>';
+    if(s.isSubLaunch&&!s.displayX2) tag='<span class="lap-tag launch">62.5m</span>';
+    else if(s.isSubLaunch&&s.displayX2) tag='<span class="lap-tag launch">312.5m</span>';
+    else if(s.isLaunch) tag='<span class="lap-tag launch">Lance.</span>';
     else if(isBest) tag='<span class="lap-tag best">Meil.</span>';
-    else if(isWorst) tag='<span class="lap-tag worst">Moins bon</span>';
-    const x2=(!s.isLaunch&&s.isHalf)?'<span class="lap-x2">½</span>':'';
-    const distLabel = Math.round(getCompCumulDistUpTo(i+1))+'m';
+    else if(isWorst) tag='<span class="lap-tag worst">-bon</span>';
+    const x2=s.displayX2?'<span class="lap-x2">×2</span>':'';
+    const distLabel=Math.round(getCompCumulDistUpTo(i+1))+'m';
     html+='<div class="'+cls+'"><span class="lap-num" style="min-width:50px;">Seg '+(i+1)+'</span><span class="lap-split">'+fmtLapFull(disp)+' '+x2+'</span><span class="lap-right">'+tag+'<span style="font-size:11px;color:var(--muted);">'+distLabel+'</span></span></div>';
   }
   el.innerHTML=html;
 }
 
-function getCompCumulDistUpTo(n) {
-  let d=0;
-  for(let i=0;i<n&&i<state.comp.segments.length;i++) d+=getSegmentDist(i,state.comp.segments[i].isHalf);
-  return d;
-}
 
 // ── FULLSCREEN ──
 let lastTap=0, dropAlert=false;
