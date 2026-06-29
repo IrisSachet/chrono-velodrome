@@ -1017,8 +1017,17 @@ function showScreen(id) {
 
 // ── BLUETOOTH STICK (ShiftLeft) ──
 document.addEventListener('keydown', e => {
-  if (e.code === 'ShiftLeft') {
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.key === 'Shift') {
     e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+}, true); // capture phase pour intercepter avant tout le reste
+
+document.addEventListener('keyup', e => {
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.key === 'Shift') {
+    e.preventDefault();
+    e.stopPropagation();
     const dash = document.getElementById('s-dashboard').classList.contains('active');
     const fs   = document.getElementById('s-fullscreen').classList.contains('active');
     if (fs) {
@@ -1027,7 +1036,18 @@ document.addEventListener('keydown', e => {
     } else if (dash) {
       recordLap();
     }
+    return false;
   }
+}, true);
+
+// Empêcher tous les boutons de prendre le focus (évite la navigation par tab/shift)
+document.querySelectorAll('button, input[type=range]').forEach(el => {
+  el.setAttribute('tabindex', '-1');
+});
+
+// Bloquer le focus sur le document entier pour les éléments interactifs
+document.addEventListener('focusin', e => {
+  if (e.target !== document.body) e.target.blur();
 });
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
