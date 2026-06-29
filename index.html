@@ -566,14 +566,15 @@ function getCompCumulDist() {
 
 function calcPronostic() {
   const segs = state.comp.segments;
-  if(segs.length<2) return null; // pas assez de données
+  if(segs.length<2) return null;
   const last = segs[segs.length-1];
-  if(last.isLaunch) return null; // encore en phase de lancement
+  if(last.isLaunch) return null;
   const cumulDist = getCompCumulDist();
-  const cumulMs = getRiderElapsed(state.comp);
+  // Temps cumulé = somme des temps réels de tous les segments
+  const cumulMs = segs.reduce((sum, s) => sum + s.realMs, 0);
   const remaining = state.raceDist - cumulDist;
   if(remaining<=0) return { finalMs: cumulMs, pct:100, cumulDist, remaining:0 };
-  // Vitesse sur le dernier segment (m/ms)
+  // Vitesse sur le dernier segment — toujours temps réel mesuré
   const lastDist = getSegmentDist(segs.length-1, last.isHalf);
   const speed = lastDist / last.realMs; // m/ms
   const timeRemaining = remaining / speed;
