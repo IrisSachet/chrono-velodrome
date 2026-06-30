@@ -581,12 +581,12 @@ function getSegmentInfo(segIndex, realMs) {
   const velo = state.veloLen;
   const half = state.threshold > 0 && (realMs/1000) < state.threshold;
 
-  // Distance cumulée déjà parcourue avant ce clic (jalons + sous-clics)
+  // Distance déjà parcourue avant ce clic
   let cumul = 0;
   for(let i=0;i<segIndex;i++) cumul += c.segments[i].distM;
 
   const jalon1 = velo * 0.75;   // 187.5m
-  const jalon2 = velo * 1.75;   // 437.5m (187.5 + 250)
+  const jalon2 = velo * 1.75;   // 437.5m
 
   if(cumul >= jalon2) {
     // Phase régulière (post-437.5m)
@@ -594,23 +594,21 @@ function getSegmentInfo(segIndex, realMs) {
     return { distM, isLaunch:false, isSubLaunch:false, isHalf:half, displayX2:half };
   }
   if(cumul >= jalon1) {
-    // Entre 187.5m et 437.5m — il reste (jalon2 - cumul) à parcourir pour atteindre 437.5
+    // Entre 187.5m et 437.5m. Le clic vise toujours jalon2 (437.5m).
+    // S'il est rapide (half) → on n'est qu'à mi-chemin → distance = moitié de ce qui reste à parcourir, affiché ×2
+    // Sinon → on atteint directement jalon2 → distance = tout ce qui reste
     const remainingToJalon2 = jalon2 - cumul;
-    if(half && remainingToJalon2 > velo/2) {
-      // clic intermédiaire à mi-chemin (312.5m), affichage ×2
-      return { distM:velo/2, isLaunch:true, isSubLaunch:true, isHalf:true, displayX2:true };
+    if(half) {
+      return { distM: remainingToJalon2/2, isLaunch:true, isSubLaunch:true, isHalf:true, displayX2:true };
     }
-    // clic qui atteint 437.5m (que ce soit en 1 ou 2 clics, on calcule la distance EXACTE restante)
-    return { distM:remainingToJalon2, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false };
+    return { distM: remainingToJalon2, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false };
   }
-  // cumul < jalon1 : avant 187.5m — il reste (jalon1 - cumul) à parcourir
+  // cumul < jalon1 : on vise jalon1 (187.5m)
   const remainingToJalon1 = jalon1 - cumul;
-  if(half && remainingToJalon1 > velo/4) {
-    // clic intermédiaire à 62.5m, affichage réel
-    return { distM:velo/4, isLaunch:true, isSubLaunch:true, isHalf:false, displayX2:false };
+  if(half) {
+    return { distM: remainingToJalon1/2, isLaunch:true, isSubLaunch:true, isHalf:false, displayX2:false };
   }
-  // clic qui atteint 187.5m (distance exacte restante, gère aussi le cas où on vient de 62.5m)
-  return { distM:remainingToJalon1, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false };
+  return { distM: remainingToJalon1, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false };
 }
 
 function getCompCumulDist() {
