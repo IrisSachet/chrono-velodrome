@@ -142,7 +142,7 @@
   .fs-prono-time { font-size:22px; font-family:monospace; font-variant-numeric:tabular-nums; color:#22d3ee; letter-spacing:1px; }
   .fs-prono-dist { font-size:11px; color:#444; margin-top:2px; }
 
-  .fs-time { font-size:88vw; font-weight:900; font-variant-numeric:tabular-nums; font-family:monospace; line-height:0.85; color:var(--green); transition:color 0.3s; letter-spacing:-4px; text-align:center; width:100%; }
+  .fs-time { font-size:70vw; font-weight:900; font-variant-numeric:tabular-nums; font-family:monospace; line-height:0.85; color:var(--green); transition:color 0.3s; letter-spacing:-4px; text-align:center; width:100%; }
   @media (orientation:landscape) { .fs-time { font-size:80vh; } }
   .fs-time.color-b { color:var(--blue); }
   .fs-time.color-c { color:var(--cyan); }
@@ -874,15 +874,23 @@ function pollGamepad() {
 requestAnimationFrame(pollGamepad);
 window.addEventListener('gamepadconnected',e=>showToast('🎮 Stick: '+e.gamepad.id.substring(0,20)));
 
-document.addEventListener('keydown',e=>{
-  if(e.code==='ShiftLeft'||e.code==='ShiftRight'){
-    e.preventDefault(); e.stopImmediatePropagation();
-    const fs=document.getElementById('s-fullscreen').classList.contains('active');
-    const dash=document.getElementById('s-dashboard').classList.contains('active');
-    if(fs||dash){if(state.activeTab==='c')recordCompLap();else recordLap();}
-    if(fs)flashFs(state.activeTab);
+
+document.addEventListener('keydown', e => {
+  if(e.code === 'Tab'){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    const fs = document.getElementById('s-fullscreen').classList.contains('active');
+    const dash = document.getElementById('s-dashboard').classList.contains('active');
+
+    if(fs || dash){
+      if(state.activeTab === 'c') recordCompLap();
+      else recordLap();
+    }
+
+    if(fs) flashFs(state.activeTab);
   }
-},true);
+}, true);
 
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 document.querySelectorAll('button,input[type=range]').forEach(el=>el.setAttribute('tabindex','-1'));
