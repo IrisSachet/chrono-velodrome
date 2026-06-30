@@ -446,22 +446,28 @@ function switchTab(t) {
 }
 
 // ── GLOBAL TICK ──
+function getLapElapsed(entity) {
+  // entity = rider ou comp : temps écoulé depuis le dernier passage (lapStart)
+  if(!entity.running || !entity.lapStart) return 0;
+  return performance.now() - entity.lapStart;
+}
+
 function globalTick() {
   const dash = document.getElementById('s-dashboard').classList.contains('active');
   const fs   = document.getElementById('s-fullscreen').classList.contains('active');
   const t = state.activeTab;
+  const entity = t==='c' ? state.comp : state.riders[t];
+
   if(dash) {
-    let elapsed = 0;
-    if(t==='c') elapsed = getRiderElapsed(state.comp);
-    else elapsed = getRiderElapsed(state.riders[t]);
+    const elapsed = getRiderElapsed(entity);
     document.getElementById('session-timer').textContent = fmtMSS(elapsed);
+    document.getElementById('lap-timer').textContent = fmtLapFull(getLapElapsed(entity));
   }
   if(fs) {
     updateFs();
-    let elapsed = 0;
-    if(t==='c') elapsed = getRiderElapsed(state.comp);
-    else elapsed = getRiderElapsed(state.riders[t]);
+    const elapsed = getRiderElapsed(entity);
     document.getElementById('fs-effort').textContent = fmtMSS(elapsed);
+    document.getElementById('fs-lap-timer').textContent = fmtLapFull(getLapElapsed(entity));
   }
   requestAnimationFrame(globalTick);
 }
@@ -575,27 +581,36 @@ function getSegmentInfo(segIndex, realMs) {
   const velo = state.veloLen;
   const half = state.threshold > 0 && (realMs/1000) < state.threshold;
 
-  // Reconstruire l'état des jalons atteints AVANT ce segment
-  let jalon = 0; // 0=départ, 1=187.5 atteint, 2=437.5 atteint (phase régulière)
-  for(let i=0;i<segIndex;i++) {
-    const s = c.segments[i];
-    if(jalon===0 && !s.isSubLaunch) jalon=1;      // premier clic non-sub = 187.5 atteint
-    else if(jalon===1 && !s.isSubLaunch) jalon=2;  // deuxième clic non-sub = 437.5 atteint
-  }
+  // Distance cumulée déjà parcourue avant ce clic (jalons + sous-clics)
+  let cumul = 0;
+  for(let i=0;i<segIndex;i++) cumul += c.segments[i].distM;
 
-  if(jalon===2) {
-    // Phase régulière
+  const jalon1 = velo * 0.75;   // 187.5m
+  const jalon2 = velo * 1.75;   // 437.5m (187.5 + 250)
+
+  if(cumul >= jalon2) {
+    // Phase régulière (post-437.5m)
     const distM = half ? velo/2 : velo;
     return { distM, isLaunch:false, isSubLaunch:false, isHalf:half, displayX2:half };
   }
-  if(jalon===1) {
-    // Entre 187.5m et 437.5m
-    if(half) return { distM:velo/2, isLaunch:true, isSubLaunch:true, isHalf:true, displayX2:true };  // 312.5m (×2 affiché)
-    return { distM:velo, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false }; // 437.5m
+  if(cumul >= jalon1) {
+    // Entre 187.5m et 437.5m — il reste (jalon2 - cumul) à parcourir pour atteindre 437.5
+    const remainingToJalon2 = jalon2 - cumul;
+    if(half && remainingToJalon2 > velo/2) {
+      // clic intermédiaire à mi-chemin (312.5m), affichage ×2
+      return { distM:velo/2, isLaunch:true, isSubLaunch:true, isHalf:true, displayX2:true };
+    }
+    // clic qui atteint 437.5m (que ce soit en 1 ou 2 clics, on calcule la distance EXACTE restante)
+    return { distM:remainingToJalon2, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false };
   }
-  // jalon===0 : avant 187.5m
-  if(half) return { distM:velo/4, isLaunch:true, isSubLaunch:true, isHalf:false, displayX2:false }; // 62.5m (réel)
-  return { distM:velo*0.75, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false }; // 187.5m
+  // cumul < jalon1 : avant 187.5m — il reste (jalon1 - cumul) à parcourir
+  const remainingToJalon1 = jalon1 - cumul;
+  if(half && remainingToJalon1 > velo/4) {
+    // clic intermédiaire à 62.5m, affichage réel
+    return { distM:velo/4, isLaunch:true, isSubLaunch:true, isHalf:false, displayX2:false };
+  }
+  // clic qui atteint 187.5m (distance exacte restante, gère aussi le cas où on vient de 62.5m)
+  return { distM:remainingToJalon1, isLaunch:true, isSubLaunch:false, isHalf:false, displayX2:false };
 }
 
 function getCompCumulDist() {
