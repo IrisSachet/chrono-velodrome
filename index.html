@@ -380,6 +380,21 @@ function fmtMSS(ms) {
   return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 }
 function fmtLap(ms) { if(ms<0)ms=0; return (ms/1000).toFixed(1); }
+function fmtLapLastDigit(ms) {
+  // Affiche uniquement le dernier chiffre des secondes + 1 décimale (ex: 14.5 → 4.5)
+  if(ms<0)ms=0;
+  const s = ms/1000;
+  const lastDigit = Math.floor(s) % 10;
+  const dec = Math.round((s - Math.floor(s)) * 10);
+  return lastDigit + '.' + dec;
+}
+function fmtLapCC(ms) {
+  // Format ss.cc (centièmes)
+  if(ms<0)ms=0;
+  const s = Math.floor(ms/1000);
+  const cc = Math.floor((ms % 1000) / 10);
+  return String(s).padStart(2,'0') + '.' + String(cc).padStart(2,'0');
+}
 function fmtLapFull(ms) { return fmtLap(ms)+'s'; }
 function fmtMMSS(ms) {
   // mm:ss.s
@@ -496,7 +511,8 @@ function recordLap() {
   const lapMs = now-r.lapStart;
   r.lapStart = now;
   const half = isHalfLap(lapMs, false);
-  r.laps.push({n:r.laps.length+1, real:lapMs, half});
+  const distM = half ? state.veloLen/2 : state.veloLen;
+  r.laps.push({n:r.laps.length+1, real:lapMs, half, distM});
   updateDashboard();
   if(document.getElementById('s-fullscreen').classList.contains('active')) flashFs(t);
 }
@@ -548,13 +564,16 @@ function renderHistory(t) {
   const el = document.getElementById('history-list');
   if(r.laps.length===0) { el.innerHTML='<div class="empty-history">Aucun tour enregistré</div>'; return; }
   let html='';
-  let cumulMs = r.laps.reduce((s,l)=>s+l.real, 0); // temps total jusqu'au dernier tour
+  let cumulMs = r.laps.reduce((s,l)=>s+l.real, 0);
+  let cumulDist = r.laps.reduce((s,l)=>s+(l.distM||state.veloLen), 0);
   for(let i=r.laps.length-1;i>=0;i--) {
     const l=r.laps[i];
     const x2=l.half?'<span class="lap-x2">½</span>':'';
     const totalLabel = fmtMMSS(cumulMs);
-    html+='<div class="lap-row"><span class="lap-num">Tour '+l.n+'</span><span class="lap-split">'+fmtLapFull(l.real)+' '+x2+'</span><span class="lap-right"><span style="font-size:11px;color:var(--tab-'+t+');font-family:monospace;">⏱'+totalLabel+'</span></span></div>';
+    const distLabel = Math.round(cumulDist)+'m';
+    html+='<div class="lap-row"><span class="lap-num">Tour '+l.n+'</span><span class="lap-split">'+fmtLapCC(l.real)+' '+x2+'</span><span class="lap-right"><span style="font-size:11px;color:var(--muted);">'+distLabel+'</span><span style="font-size:11px;color:var(--tab-'+t+');font-family:monospace;">⏱'+totalLabel+'</span></span></div>';
     cumulMs -= l.real;
+    cumulDist -= (l.distM||state.veloLen);
   }
   el.innerHTML=html;
 }
@@ -729,7 +748,7 @@ function renderCompHistory() {
     const x2=s.displayX2?'<span class="lap-x2">×2</span>':'';
     const distLabel=Math.round(getCompCumulDistUpTo(i+1))+'m';
     const totalLabel = fmtMMSS(cumulMs); // temps cumulé depuis le départ jusqu'à CE segment inclus
-    html+='<div class="'+cls+'"><span class="lap-num" style="min-width:50px;">Seg '+(i+1)+'</span><span class="lap-split">'+fmtLapFull(s.realMs)+' '+x2+'</span><span class="lap-right">'+tag+'<span style="font-size:11px;color:var(--muted);">'+distLabel+'</span><span style="font-size:11px;color:var(--cyan);font-family:monospace;">⏱'+totalLabel+'</span></span></div>';
+    html+='<div class="'+cls+'"><span class="lap-num" style="min-width:50px;">Seg '+(i+1)+'</span><span class="lap-split">'+fmtLapCC(s.realMs)+' '+x2+'</span><span class="lap-right">'+tag+'<span style="font-size:11px;color:var(--muted);">'+distLabel+'</span><span style="font-size:11px;color:var(--cyan);font-family:monospace;">⏱'+totalLabel+'</span></span></div>';
     cumulMs -= s.realMs; // pour la ligne précédente (en remontant)
   }
   el.innerHTML=html;
@@ -774,15 +793,13 @@ function updateFs() {
     const segs=state.comp.segments;
     if(segs.length===0) { document.getElementById('fs-time').textContent='—'; return; }
     const last=segs[segs.length-1];
-    const disp = last.isLaunch ? last.realMs : displayTime(last.realMs, false);
-    document.getElementById('fs-time').textContent = fmtLap(disp);
-    // Pronostic : NE PAS recalculer ici, garder la valeur figée depuis le dernier clic
-    // (déjà mise à jour par updateComp() au moment du passage)
+    const disp = last.displayX2 ? last.realMs*2 : last.realMs;
+    document.getElementById('fs-time').textContent = fmtLapLastDigit(disp);
   } else {
     const r=state.riders[t];
     if(r.laps.length===0) { document.getElementById('fs-time').textContent='—'; return; }
     const last=r.laps[r.laps.length-1];
-    document.getElementById('fs-time').textContent = fmtLap(displayTime(last.real, false));
+    document.getElementById('fs-time').textContent = fmtLapLastDigit(displayTime(last.real, false));
   }
 }
 
