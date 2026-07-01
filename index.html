@@ -882,8 +882,16 @@ function pollGamepad() {
   if(any&&!gpPrevPressed){
     const fs=document.getElementById('s-fullscreen').classList.contains('active');
     const dash=document.getElementById('s-dashboard').classList.contains('active');
-    if(fs||dash){if(state.activeTab==='c')recordCompLap();else recordLap();}
-    if(fs)flashFs(state.activeTab);
+    if(fs||dash){
+      const t=state.activeTab;
+      const entity = t==='c' ? state.comp : state.riders[t];
+      if(!entity.running) {
+        if(t==='c') toggleCompTimer(); else toggleTimer();
+      } else {
+        if(t==='c') recordCompLap(); else recordLap();
+        if(fs) flashFs(t);
+      }
+    }
   }
   gpPrevPressed=any;
   requestAnimationFrame(pollGamepad);
@@ -896,8 +904,18 @@ document.addEventListener('keydown',e=>{
     e.preventDefault(); e.stopImmediatePropagation();
     const fs=document.getElementById('s-fullscreen').classList.contains('active');
     const dash=document.getElementById('s-dashboard').classList.contains('active');
-    if(fs||dash){if(state.activeTab==='c')recordCompLap();else recordLap();}
-    if(fs)flashFs(state.activeTab);
+    if(fs||dash){
+      const t=state.activeTab;
+      const entity = t==='c' ? state.comp : state.riders[t];
+      if(!entity.running) {
+        // Pas encore démarré → démarrer
+        if(t==='c') toggleCompTimer(); else toggleTimer();
+      } else {
+        // En cours → enregistrer un passage
+        if(t==='c') recordCompLap(); else recordLap();
+        if(fs) flashFs(t);
+      }
+    }
   }
 },true);
 
