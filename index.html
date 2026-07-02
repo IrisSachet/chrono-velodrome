@@ -381,11 +381,12 @@ function fmtMSS(ms) {
 }
 function fmtLap(ms) { if(ms<0)ms=0; return (ms/1000).toFixed(1); }
 function fmtLapLastDigit(ms) {
-  // Affiche uniquement le dernier chiffre des secondes + 1 décimale (ex: 14.5 → 4.5)
   if(ms<0)ms=0;
-  const s = ms/1000;
+  // Arrondir à 1 décimale d'abord pour éviter les débordements (14.95 → 15.0)
+  const s = Math.round(ms/100) / 10; // arrondi à 0.1s
   const lastDigit = Math.floor(s) % 10;
   const dec = Math.round((s - Math.floor(s)) * 10);
+  if(dec === 10) return ((Math.floor(s)+1) % 10) + '.0'; // sécurité supplémentaire
   return lastDigit + '.' + dec;
 }
 function fmtLapCC(ms) {
@@ -503,12 +504,15 @@ function toggleTimer() {
   updateDashboard();
 }
 
+const MIN_LAP_MS = 1000; // garde-fou anti-double déclenchement accidentel
+
 function recordLap() {
   const t = state.activeTab;
   const r = state.riders[t];
   if(!r.running) return;
   const now = performance.now();
   const lapMs = now-r.lapStart;
+  if(lapMs < MIN_LAP_MS) return; // ignore les déclenchements parasites
   r.lapStart = now;
   const half = isHalfLap(lapMs, false);
   const distM = half ? state.veloLen/2 : state.veloLen;
@@ -666,6 +670,7 @@ function recordCompLap() {
   if(!c.running) return;
   const now = performance.now();
   const realMs = now-c.lapStart;
+  if(realMs < MIN_LAP_MS) return; // ignore les déclenchements parasites
   c.lapStart = now;
   const info = getSegmentInfo(c.segments.length, realMs);
   c.segments.push({ realMs, ...info });
