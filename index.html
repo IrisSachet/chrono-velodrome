@@ -170,14 +170,24 @@
   <div class="settings-sub">Configuration de la session</div>
 
   <div class="settings-section">
-    <div class="settings-label">Coureurs</div>
+    <div class="settings-label">Coureur</div>
     <div class="settings-row">
       <div class="settings-dot dot-a"></div>
-      <input type="text" id="name-a" placeholder="Coureur A" maxlength="20" autocomplete="off">
+      <input type="text" id="name-a" placeholder="Nom du coureur" maxlength="20" autocomplete="off">
     </div>
-    <div class="settings-row">
-      <div class="settings-dot dot-b"></div>
-      <input type="text" id="name-b" placeholder="Coureur B" maxlength="20" autocomplete="off">
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-label">Cible au tour</div>
+    <div class="settings-row" style="justify-content:space-between;">
+      <span style="font-size:15px;">Temps cible</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="number" id="target-time" placeholder="—" min="1" max="120" step="0.1" style="width:80px;color:var(--green);">
+        <span style="color:var(--muted);font-size:14px;">s</span>
+      </div>
+    </div>
+    <div class="threshold-hint" style="padding:0 4px;">
+      Vert = ±0.1s · Bleu = plus rapide · Rouge = plus lent<br>Sans cible : toujours vert.
     </div>
   </div>
 
@@ -236,15 +246,11 @@
   <div class="tabs">
     <div class="tab active-a" id="tab-a" onclick="switchTab('a')">
       <div class="tab-dot" style="background:var(--tab-a)"></div>
-      <span id="tab-label-a">Coureur A</span>
-    </div>
-    <div class="tab" id="tab-b" onclick="switchTab('b')">
-      <div class="tab-dot" style="background:var(--tab-b)"></div>
-      <span id="tab-label-b">Coureur B</span>
+      <span>Effort lancé</span>
     </div>
     <div class="tab" id="tab-c" onclick="switchTab('c')">
       <div class="tab-dot" style="background:var(--tab-c)"></div>
-      <span>Compétition</span>
+      <span>Effort arrêté</span>
     </div>
   </div>
 
@@ -362,15 +368,15 @@ const state = {
   threshold: 12,
   veloLen: 250,
   raceDist: 4000,
-  names: { a: 'Coureur A', b: 'Coureur B' },
+  targetTime: null, // en ms, null = pas de cible
+  names: { a: 'Coureur' },
   activeTab: 'a',
   riders: {
-    a: { running:false, startTime:null, lapStart:null, laps:[], pausedMs:0 },
-    b: { running:false, startTime:null, lapStart:null, laps:[], pausedMs:0 }
+    a: { running:false, startTime:null, lapStart:null, laps:[], pausedMs:0 }
   },
   comp: {
     running:false, startTime:null, lapStart:null, pausedMs:0,
-    segments:[] // { realMs, distM, isLaunch }
+    segments:[]
   }
 };
 
@@ -419,14 +425,13 @@ document.getElementById('threshold-slider').addEventListener('input', function()
 });
 
 function startSession() {
-  state.names.a = document.getElementById('name-a').value.trim() || 'Coureur A';
-  state.names.b = document.getElementById('name-b').value.trim() || 'Coureur B';
+  state.names.a = document.getElementById('name-a').value.trim() || 'Coureur';
   state.threshold = parseFloat(document.getElementById('threshold-slider').value);
   state.veloLen = parseFloat(document.getElementById('velodrome-len').value) || 250;
   state.raceDist = parseFloat(document.getElementById('race-dist').value) || 4000;
-  document.getElementById('tab-label-a').textContent = state.names.a;
-  document.getElementById('tab-label-b').textContent = state.names.b;
-  ['a','b'].forEach(r => { state.riders[r] = {running:false,startTime:null,lapStart:null,laps:[],pausedMs:0}; });
+  const tRaw = parseFloat(document.getElementById('target-time').value);
+  state.targetTime = isNaN(tRaw) || tRaw <= 0 ? null : tRaw * 1000; // ms
+  state.riders.a = {running:false,startTime:null,lapStart:null,laps:[],pausedMs:0};
   state.comp = {running:false,startTime:null,lapStart:null,pausedMs:0,segments:[]};
   state.activeTab = 'a';
   switchTab('a');
@@ -434,10 +439,8 @@ function startSession() {
 }
 
 function goSettings() {
-  ['a','b'].forEach(r => {
-    const rider = state.riders[r];
-    if(rider.running) { rider.pausedMs += performance.now()-rider.startTime; rider.running=false; }
-  });
+  const rider = state.riders.a;
+  if(rider.running) { rider.pausedMs += performance.now()-rider.startTime; rider.running=false; }
   const c = state.comp;
   if(c.running) { c.pausedMs += performance.now()-c.startTime; c.running=false; }
   showScreen('s-settings');
@@ -453,12 +456,21 @@ function getRiderElapsed(r) {
 function switchTab(t) {
   state.activeTab = t;
   document.getElementById('tab-a').className = 'tab'+(t==='a'?' active-a':'');
-  document.getElementById('tab-b').className = 'tab'+(t==='b'?' active-b':'');
   document.getElementById('tab-c').className = 'tab'+(t==='c'?' active-c':'');
   document.getElementById('dash-normal').style.display = t!=='c' ? 'flex' : 'none';
   document.getElementById('dash-comp').style.display   = t==='c' ? 'flex' : 'none';
   if(t!=='c') updateDashboard();
   else updateComp();
+}
+
+// ── COULEUR CIBLE ──
+// displayedMs = temps affiché (déjà ×2 si demi-tour)
+function getTargetColor(displayedMs) {
+  if(!state.targetTime) return 'var(--green)'; // pas de cible → vert
+  const diff = displayedMs - state.targetTime; // + = plus lent, - = plus rapide
+  if(Math.abs(diff) <= 100) return 'var(--green)'; // ±0.1s → vert
+  if(diff < -100) return 'var(--blue)';             // plus rapide → bleu
+  return 'var(--red)';                              // plus lent → rouge
 }
 
 // ── GLOBAL TICK ──
@@ -772,7 +784,9 @@ function openFullscreen() {
   const t=state.activeTab;
   const isComp = t==='c';
   document.getElementById('fs-name').textContent = isComp ? 'COMPÉTITION' : state.names[t].toUpperCase();
-  document.getElementById('fs-time').className = 'fs-time color-'+(isComp?'c':t);
+  const fsTimeEl = document.getElementById('fs-time');
+  fsTimeEl.className = 'fs-time'; // on retire les classes couleur, on gère via style.color
+  fsTimeEl.style.color = 'var(--green)'; // défaut vert
   document.getElementById('fs-unit').textContent = isComp ? 'pronostic' : 'secondes';
   document.getElementById('fs-prono-box').style.display = isComp ? 'block' : 'none';
   document.getElementById('btn-drop').style.display = 'block';
@@ -787,24 +801,36 @@ function toggleDrop(e) {
   dropAlert=!dropAlert;
   const fs=document.getElementById('s-fullscreen');
   const btn=document.getElementById('btn-drop');
-  if(dropAlert) { fs.classList.add('alert'); btn.classList.add('active'); btn.textContent='✓ Retour normal'; }
-  else { fs.classList.remove('alert'); btn.classList.remove('active'); btn.textContent='⚠ Un lâché'; }
+  if(dropAlert) {
+    fs.classList.add('alert');
+    btn.classList.add('active');
+    btn.textContent='✓ Retour normal';
+  } else {
+    fs.classList.remove('alert');
+    btn.classList.remove('active');
+    btn.textContent='⚠ Un lâché';
+    updateFs(); // restaure la couleur cible
+  }
 }
 
 function updateFs() {
   const t = state.activeTab;
   const isComp = t==='c';
+  const fsTimeEl = document.getElementById('fs-time');
   if(isComp) {
     const segs=state.comp.segments;
-    if(segs.length===0) { document.getElementById('fs-time').textContent='—'; return; }
+    if(segs.length===0) { fsTimeEl.textContent='—'; return; }
     const last=segs[segs.length-1];
     const disp = last.displayX2 ? last.realMs*2 : last.realMs;
-    document.getElementById('fs-time').textContent = fmtLapLastDigit(disp);
+    fsTimeEl.textContent = fmtLapLastDigit(disp);
+    if(!dropAlert) fsTimeEl.style.color = getTargetColor(disp);
   } else {
     const r=state.riders[t];
-    if(r.laps.length===0) { document.getElementById('fs-time').textContent='—'; return; }
+    if(r.laps.length===0) { fsTimeEl.textContent='—'; return; }
     const last=r.laps[r.laps.length-1];
-    document.getElementById('fs-time').textContent = fmtLapLastDigit(displayTime(last.real, false));
+    const disp = displayTime(last.real, false);
+    fsTimeEl.textContent = fmtLapLastDigit(disp);
+    if(!dropAlert) fsTimeEl.style.color = getTargetColor(disp);
   }
 }
 
@@ -841,22 +867,24 @@ function handleFsTap(e) {
 // ── EXPORT ──
 function exportData() {
   const ts=new Date().toLocaleString('fr-FR');
-  let txt='=== Chrono Vélodrome ===\nSession du '+ts+'\nSeuil: '+state.threshold+'s\n\n';
-  ['a','b'].forEach(t=>{
-    const r=state.riders[t];
-    txt+='── '+state.names[t]+' ──\n';
-    if(r.laps.length===0){txt+='Aucun tour\n\n';return;}
+  let txt='=== Chrono Vélodrome ===\nSession du '+ts+'\n';
+  txt+='Seuil: '+state.threshold+'s';
+  if(state.targetTime) txt+=' · Cible: '+(state.targetTime/1000).toFixed(1)+'s';
+  txt+='\n\n';
+  const r=state.riders.a;
+  txt+='── Effort lancé ('+state.names.a+') ──\n';
+  if(r.laps.length===0){txt+='Aucun tour\n\n';}
+  else {
     r.laps.forEach(l=>{txt+='Tour '+l.n+': '+fmtLapFull(l.real)+(l.half?' [×2 → '+fmtLapFull(l.real*2)+']':'')+'\n';});
     const reals=r.laps.map(l=>l.real);
     txt+='Meilleur: '+fmtLapFull(Math.min(...reals))+'\nMoyenne: '+fmtLapFull(reals.reduce((a,b)=>a+b,0)/reals.length)+'\n\n';
-  });
+  }
   const c=state.comp;
-  txt+='── Compétition ('+state.raceDist+'m / vélodrome '+state.veloLen+'m) ──\n';
+  txt+='── Effort arrêté / Compétition ('+state.raceDist+'m / vélodrome '+state.veloLen+'m) ──\n';
   if(c.segments.length===0){txt+='Aucun segment\n';}
   else {
     c.segments.forEach((s,i)=>{
-      const dist=getSegmentDist(i,s.isHalf);
-      txt+='Seg '+(i+1)+' ('+Math.round(dist)+'m): '+fmtLapFull(s.realMs)+(s.isLaunch?' [lancement]':s.isHalf?' [demi-tour]':'')+'\n';
+      txt+='Seg '+(i+1)+' ('+Math.round(s.distM)+'m): '+fmtLapFull(s.realMs)+(s.isLaunch?' [lancement]':s.isHalf?' [demi-tour]':'')+'\n';
     });
     const prono=calcPronostic();
     if(prono) txt+='\nPronostic final: '+fmtMMSS(prono.finalMs)+'\n';
@@ -905,7 +933,7 @@ requestAnimationFrame(pollGamepad);
 window.addEventListener('gamepadconnected',e=>showToast('🎮 Stick: '+e.gamepad.id.substring(0,20)));
 
 document.addEventListener('keydown',e=>{
-  if(e.code==='ShiftLeft'||e.code==='ShiftRight'||e.code==='Tab'){
+  if(e.code==='ShiftLeft'||e.code==='ShiftRight'||e.code==='Tab'||e.code==='PageUp'){
     e.preventDefault(); e.stopImmediatePropagation();
     const fs=document.getElementById('s-fullscreen').classList.contains('active');
     const dash=document.getElementById('s-dashboard').classList.contains('active');
