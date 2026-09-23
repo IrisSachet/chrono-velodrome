@@ -146,7 +146,7 @@
   @media (orientation:landscape) { .fs-time { font-size:80vh; } }
   .fs-time.color-b { color:var(--blue); }
   .fs-time.color-c { color:var(--cyan); }
-  .fs-time.flash { color:#fff; }
+  .fs-time.flash { color:#fff !important; }
   #s-fullscreen.alert .fs-time { color:#fff !important; }
   .fs-unit { font-size:16px; color:#333; margin-top:6px; letter-spacing:3px; transition:color 0.3s; }
   #s-fullscreen.alert .fs-unit { color:#fca5a5; }
@@ -836,9 +836,17 @@ function updateFs() {
 
 function flashFs(t) {
   const el=document.getElementById('fs-time');
+  // Mettre à jour le texte sans toucher à la couleur (inline style écraserait le flash)
+  const isComp = t==='c';
+  if(isComp) {
+    const segs=state.comp.segments;
+    if(segs.length>0) { const last=segs[segs.length-1]; el.textContent=fmtLapLastDigit(last.displayX2?last.realMs*2:last.realMs); }
+  } else {
+    const r=state.riders[t];
+    if(r.laps.length>0) { const last=r.laps[r.laps.length-1]; el.textContent=fmtLapLastDigit(displayTime(last.real,false)); }
+  }
   el.classList.add('flash');
-  setTimeout(()=>el.classList.remove('flash'),180);
-  updateFs();
+  setTimeout(()=>{ el.classList.remove('flash'); updateFs(); }, 180);
   if(t==='c') updateComp();
 }
 
